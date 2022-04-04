@@ -20,11 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-		'pca9685 = robocar_py.pca9685:main',
-		'teleop_car_control_keyboard = robocar_py.teleop_car_control_keyboard:main',
-		'camera_processor = robocar_py.camera_processor:main',
-
-
+        'camera_processor = robocar_py.camera_processor:main',
+        'camera_viewer = robocar_py.camera_viewer:main',
         ],
     },
 )
