@@ -3,18 +3,10 @@ import rclpy
 from rclpy.node import Node
 import cv2
 import numpy as np
-import torch
-import segmentation_models_pytorch as smp
-from util.util import get_preprocessing
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
-
-ENCODER = 'timm-mobilenetv3_small_minimal_100'
-ENCODER_WEIGHTS = 'imagenet'
-preprocessing_fn = smp.encoders.get_preprocessing_fn(ENCODER, ENCODER_WEIGHTS)
-preprocessing  = get_preprocessing(preprocessing_fn)
 
 imsizeX = 128
 imsizeY = 96
@@ -50,7 +42,7 @@ class CameraProcessor(Node):
         timer_period = 0.001
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.model = torch.load('./best_model.pth')
+        #self.model = torch.load('./best_model.pth')
 
         self.cap = cv2.VideoCapture(0)
         ret, self.frame = self.cap.read()
@@ -124,7 +116,7 @@ class CameraProcessor(Node):
 
                 pth = th.dot(H)
                 
-                calib_file_path = self.get_parameter('calibration_save').get_parameter_value().string_value
+                calib_file_path = self.get_paSrameter('calibration_save').get_parameter_value().string_value
                 np.savez(calib_file_path, homography=pth, width=bwidth, height=bheight)
 
                 return pth, bwidth, bheight
@@ -133,29 +125,12 @@ class CameraProcessor(Node):
         try:
             ret, self.frame = self.cap.read()
             if (ret):
-                image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
-                image = cv2.resize(image, (imsizeX, imsizeY))
+                image = cv2.resize(self.frame, (imsizeX, imsizeY))
 
-                # apply preprocessinga
-                sample = preprocessing(image=image)
-                image = sample['image']
-                x_tensor = torch.from_numpy(image).to('cuda').unsqueeze(0)
-
-                # make prediction, undo the processing and combine
-                pr_mask = self.model.predict(x_tensor)
-                pr_mask = (pr_mask.squeeze().cpu().numpy().round())
-                predictionYellow = pr_mask[0][imsizeY-predictionHeight:imsizeY]
-                predictionBlue = pr_mask[1][imsizeY-predictionHeight:imsizeY]
-
-                # create an empty array for drawing
-
-                prediction = np.zeros((predictionHeight, imsizeX, 3), dtype=float)
                 if(hasattr(self, 'homography')):
-                    prediction = cv2.warpPerspective(pr_mask[0], self.homography, (self.bwidth, self.bheight))
+                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
                                 
-                self.pub_img.publish(self.cvb.cv2_to_compressed_imgmsg(pr_mask[0]))
-
-                cv2.imshow("doidfj", pr_mask[0])
+                self.pub_img.publish(self.cvb.cv2_to_compressed_imgmsg(image))
 
                 self.transmit_unfiltered = self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
                 if (self.transmit_unfiltered):

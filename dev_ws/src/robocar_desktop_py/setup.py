@@ -22,7 +22,6 @@ setup(
         'console_scripts': [
             'camera_processor = robocar_desktop_py.camera_processor:main',
             'camera_viewer = robocar_desktop_py.camera_viewer:main',
-            'line_follower = robocar_desktop_py.line_follower:main',
         ],
     },
 )
