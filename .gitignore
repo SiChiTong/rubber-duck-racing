@@ -135,5 +135,4 @@ dev_ws/log
 dev_ws/calibration.npz
 
 # Jupyter Notebooks stuff
-jupyter_notebooks/yolov5
 jupyter_notebooks/.ipynb_checkpoints
