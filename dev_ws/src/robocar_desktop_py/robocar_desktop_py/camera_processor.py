@@ -14,23 +14,28 @@ class CameraProcessor(Node):
         super().__init__('camera_processor')
         
         self.calibrate_warp_srv = self.create_service(Empty, 'calibrate_warp', self.calibrate_warp_callback)
-        
+        self.refresh_params_srv = self.create_service(Empty, 'refresh_params', self.refresh_params_callback)
+
         self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 10)
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 10)
         self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, 'unfiltered_feed', 10)
 
-        self.declare_parameter('transmit_unfiltered', False)
-        self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
+        self.declare_parameter('transmit_unfiltered', True)
         
         self.declare_parameter('line_filter_mode', 'hsv')
 
-        self.hsv_yellow_low = (40, 30, 30)
-        self.hsv_yellow_high = (70, 255, 255)
-        self.hsv_blue_low = (165, 30, 30)
-        self.hsv_blue_high = (260, 255, 255)
+        self.yellow_hsv_vals = [40, 30, 30, 70, 255, 255]
+        self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
+        self.blue_hsv_vals = [165, 30, 30, 260, 255, 255]
+        self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)        
 
         self.declare_parameter('warp_calib_file', 'warp_calib.npz')
         self.declare_parameter('warp_calib_save', 'warp_calib')
+
+        self.line_filter_mode = self.get_parameter('line_filter_mode').get_parameter_value().string_value
+        self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
+        self.yellow_hsv_vals = self.get_parameter('yellow_hsv_vals').get_parameter_value().integer_array_value
+        self.blue_hsv_vals = self.get_parameter('blue_hsv_vals').get_parameter_value().integer_array_value
 
         try:
             calib_file_path =  self.get_parameter('warp_calib_file').get_parameter_value().string_value
@@ -120,8 +125,30 @@ class CameraProcessor(Node):
 
     def hsv_line_detect(self, image):
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        blue_mask = cv2.inRange(hsv_image, self.hsv_blue_low, self.hsv_blue_high)
-        yellow_mask = cv2.inRange(hsv_image, self.hsv_yellow_low, self.hsv_yellow_high)
+        blue_mask = cv2.inRange(hsv_image, 
+            (
+                self.blue_hsv_vals[0],
+                self.blue_hsv_vals[1],
+                self.blue_hsv_vals[2]
+            ),
+            (
+                self.blue_hsv_vals[3],
+                self.blue_hsv_vals[4],
+                self.blue_hsv_vals[5]
+                
+            ))
+        yellow_mask = cv2.inRange(hsv_image, 
+            (
+                self.yellow_hsv_vals[0],
+                self.yellow_hsv_vals[1],
+                self.yellow_hsv_vals[2]
+            ),
+            (
+                self.yellow_hsv_vals[3],
+                self.yellow_hsv_vals[4],
+                self.yellow_hsv_vals[5]
+                
+            ))
         return blue_mask, yellow_mask
         
     def nn_line_detect(self):
@@ -130,10 +157,10 @@ class CameraProcessor(Node):
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
+            image = self.frame
+            
             if (ret):
-                line_filter_mode = self.get_parameter('line_filter_mode').get_parameter_value().string_value
-
-                if (line_filter_mode == 'hsv'):
+                if (self.line_filter_mode == 'hsv'):
                     if (hasattr(self, 'homography')):
                         image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
 
@@ -141,10 +168,9 @@ class CameraProcessor(Node):
 
                     self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                     self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
-                elif (line_filter_mode == 'nn'):
+                elif (self.line_filter_mode == 'nn'):
                     self.nn_line_detect()
     
-                self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
                 if (self.transmit_unfiltered):
                     self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
 
@@ -161,6 +187,14 @@ class CameraProcessor(Node):
             self.get_logger().info(str(e))
         else:
             self.get_logger().info('Calibration Succeeded')
+        return response
+
+    def refresh_params_callback(self, request, response):
+        self.get_logger().info('Refreshing the parameters')
+        self.line_filter_mode = self.get_parameter('line_filter_mode').get_parameter_value().string_value
+        self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
+        self.yellow_hsv_vals = self.get_parameter('yellow_hsv_vals').get_parameter_value().integer_array_value
+        self.blue_hsv_vals = self.get_parameter('blue_hsv_vals').get_parameter_value().integer_array_value
         return response
 
 def main(args=None):
