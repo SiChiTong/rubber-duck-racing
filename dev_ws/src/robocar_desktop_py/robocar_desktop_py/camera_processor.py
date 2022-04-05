@@ -8,9 +8,8 @@ import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
 
-imsizeX = 128
-imsizeY = 96
-predictionHeight = imsizeY//8
+imsizeX = 640
+imsizeY = 480
 
 class CameraProcessor(Node):
 
@@ -55,8 +54,8 @@ class CameraProcessor(Node):
         for x in range (10):
             for y in range(7):
                 i = y + x * 7
-                cornersFlat[i][0][0] = x * 5 + offsetX
-                cornersFlat[i][0][1] = y * 5 + offsetY
+                cornersFlat[i][0][0] = x * 20 + offsetX
+                cornersFlat[i][0][1] = y * 20 + offsetY
 
         return cornersFlat
     
@@ -122,9 +121,8 @@ class CameraProcessor(Node):
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
-            image = self.frame
             if (ret):
-                #image = cv2.resize(self.frame, (imsizeX, imsizeY))
+                image = cv2.resize(self.frame, (imsizeX, imsizeY))
 
                 if(hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))

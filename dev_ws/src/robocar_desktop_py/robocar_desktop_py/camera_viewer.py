@@ -25,7 +25,7 @@ class CameraViewer(Node):
 
     def listener_callback(self, msg):
         frame = cvb.compressed_imgmsg_to_cv2(msg)
-        frame = cv2.resize(frame, (frame.shape[1] * 4, frame.shape[0] * 4), cv2.INTER_NEAREST)
+        #frame = cv2.resize(frame, (frame.shape[1] * 4, frame.shape[0] * 4), cv2.INTER_NEAREST)
         cv2.imshow("recieve", frame)
         cv2.waitKey(1)
         #self.get_logger().info("recieved frame")
