@@ -42,8 +42,6 @@ class CameraProcessor(Node):
         timer_period = 0.001
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        #self.model = torch.load('./best_model.pth')
-
         self.cap = cv2.VideoCapture(0)
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
@@ -116,7 +114,7 @@ class CameraProcessor(Node):
 
                 pth = th.dot(H)
                 
-                calib_file_path = self.get_paSrameter('calibration_save').get_parameter_value().string_value
+                calib_file_path = self.get_parameter('calibration_save').get_parameter_value().string_value
                 np.savez(calib_file_path, homography=pth, width=bwidth, height=bheight)
 
                 return pth, bwidth, bheight
@@ -124,8 +122,9 @@ class CameraProcessor(Node):
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
+            image = self.frame
             if (ret):
-                image = cv2.resize(self.frame, (imsizeX, imsizeY))
+                #image = cv2.resize(self.frame, (imsizeX, imsizeY))
 
                 if(hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
