@@ -132,7 +132,6 @@ dmypy.json
 dev_ws/build
 dev_ws/install
 dev_ws/log
-dev_ws/calibration.npz
 
 # Jupyter Notebooks stuff
 jupyter_notebooks/.ipynb_checkpoints
