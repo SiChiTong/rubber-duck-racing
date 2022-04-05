@@ -8,9 +8,6 @@ import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
 
-imsizeX = 640
-imsizeY = 480
-
 class CameraProcessor(Node):
 
     def __init__(self):
@@ -18,25 +15,31 @@ class CameraProcessor(Node):
         
         self.calibrate_warp_srv = self.create_service(Empty, 'calibrate_warp', self.calibrate_warp_callback)
         
-        self.topic = topic = "webcam_feed"
-        
-        self.pub_img = self.create_publisher(sensor_msgs.msg.CompressedImage, topic, 10)
-        self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, topic + '/unfiltered', 10)
+        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 10)
+        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 10)
+        self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, 'unfiltered_feed', 10)
 
         self.declare_parameter('transmit_unfiltered', False)
         self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
+        
+        self.declare_parameter('line_filter_mode', 'hsv')
 
-        self.declare_parameter('calibration_file', 'calibration.npz')
-        self.declare_parameter('calibration_save', 'calibration')
+        self.hsv_yellow_low = (40, 30, 30)
+        self.hsv_yellow_high = (70, 255, 255)
+        self.hsv_blue_low = (165, 30, 30)
+        self.hsv_blue_high = (260, 255, 255)
+
+        self.declare_parameter('warp_calib_file', 'warp_calib.npz')
+        self.declare_parameter('warp_calib_save', 'warp_calib')
 
         try:
-            calib_file_path =  self.get_parameter('calibration_file').get_parameter_value().string_value
+            calib_file_path =  self.get_parameter('warp_calib_file').get_parameter_value().string_value
             data = np.load(calib_file_path)
             self.homography = data['homography']
             self.bwidth = int(data['width'])
             self.bheight = int(data['height'])
         except Exception as e:
-            self.get_logger().info("failed to read calibration file: " + str(e))
+            self.get_logger().info("failed to read warp calibration file, no warp will be applied")
 
         timer_period = 0.001
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -48,15 +51,12 @@ class CameraProcessor(Node):
     @staticmethod
     def generateFlatCorners():
         cornersFlat = np.zeros((70, 1, 2))
-        offsetX = 320 - 100
-        offsetY = 240 - 70
 
         for x in range (10):
             for y in range(7):
                 i = y + x * 7
-                cornersFlat[i][0][0] = x * 20 + offsetX
-                cornersFlat[i][0][1] = y * 20 + offsetY
-
+                cornersFlat[i][0][0] = x * 20
+                cornersFlat[i][0][1] = y * 20
         return cornersFlat
     
     @staticmethod
@@ -113,29 +113,44 @@ class CameraProcessor(Node):
 
                 pth = th.dot(H)
                 
-                calib_file_path = self.get_parameter('calibration_save').get_parameter_value().string_value
+                calib_file_path = self.get_parameter('warp_calib_save').get_parameter_value().string_value
                 np.savez(calib_file_path, homography=pth, width=bwidth, height=bheight)
 
                 return pth, bwidth, bheight
+
+    def hsv_line_detect(self, image):
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        blue_mask = cv2.inRange(hsv_image, self.hsv_blue_low, self.hsv_blue_high)
+        yellow_mask = cv2.inRange(hsv_image, self.hsv_yellow_low, self.hsv_yellow_high)
+        return blue_mask, yellow_mask
+        
+    def nn_line_detect(self):
+        self.get_logger().warning("Neural Network mode not implemented")
 
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
             if (ret):
-                image = cv2.resize(self.frame, (imsizeX, imsizeY))
+                line_filter_mode = self.get_parameter('line_filter_mode').get_parameter_value().string_value
 
-                if(hasattr(self, 'homography')):
-                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
-                                
-                self.pub_img.publish(self.cvb.cv2_to_compressed_imgmsg(image))
+                if (line_filter_mode == 'hsv'):
+                    if (hasattr(self, 'homography')):
+                        image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
 
-                self.transmit_unfiltered = self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
+                    blue_mask, yellow_mask = self.hsv_line_detect(image)
+
+                    self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
+                    self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
+                elif (line_filter_mode == 'nn'):
+                    self.nn_line_detect()
+    
+                self.transmit_unfiltered = self.get_parameter('transmit_unfiltered').get_parameter_value().bool_value
                 if (self.transmit_unfiltered):
                     self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
 
                 cv2.waitKey(1)
         except Exception as e:
-            self.get_logger().info(str(e))
+            self.get_logger().info(str(e)) 
 
     def calibrate_warp_callback(self, request, response):
         self.get_logger().info('Request to calibrate recieved')
