@@ -1,0 +1,10 @@
+# ROS2 Developement Workspace for Rubber Duck Racing
+This is the ROS2 dev_ws for all of the packages used in the rubber duck racing team project
+## Nodes in the packages
+|   **Node Name**  |                                                       **Description**                                                       |                                **Pub Topics**                                | **Sub Topics** |
+|:----------------:|:---------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------:|:--------------:|
+| camera_processor | Captures frames from the camerera, applies fisheye and perspective corrections, then computes HSV or neural line detection. | < ul >< li > webcam_feed </ li >< li > webcam_feed/unfiltered </ li ></ ul > |                |
+| camera_viewer    |                                                                                                                             |                                                                              |                |
+| pca9685          |                                                                                                                             |                                                                              |                |
+| mpu6050          |                                                                                                                             |                                                                              |                |
+| hc-020k          |                                                                                                                             |                                                                              |                |
