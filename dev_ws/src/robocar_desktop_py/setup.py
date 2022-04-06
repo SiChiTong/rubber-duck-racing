@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'camera_processor = robocar_desktop_py.camera_processor:main',
             'camera_viewer = robocar_desktop_py.camera_viewer:main',
+            'heuristic_controller = robocar_desktop_py.heuristic_controller:main',
         ],
     },
 )

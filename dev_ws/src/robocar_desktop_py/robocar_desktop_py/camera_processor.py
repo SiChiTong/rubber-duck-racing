@@ -24,9 +24,9 @@ class CameraProcessor(Node):
         
         self.declare_parameter('line_filter_mode', 'hsv')
 
-        self.yellow_hsv_vals = [40, 30, 30, 70, 255, 255]
+        self.yellow_hsv_vals = [25, 54, 60, 32, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
-        self.blue_hsv_vals = [165, 30, 30, 260, 255, 255]
+        self.blue_hsv_vals = [100, 120, 85, 122, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)        
 
         self.declare_parameter('warp_calib_file', 'warp_calib.npz')
