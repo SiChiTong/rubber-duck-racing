@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 import cv2
 import numpy as np
+from Segnet.segnet import SegNet
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -52,6 +53,10 @@ class CameraProcessor(Node):
         self.cap = cv2.VideoCapture(0)
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
+        self.line_detector = SegNet(
+            model_path='./best_model.pth',
+            res=(384,288)
+        )
 
     @staticmethod
     def generateFlatCorners():
@@ -151,8 +156,9 @@ class CameraProcessor(Node):
             ))
         return blue_mask, yellow_mask
         
-    def nn_line_detect(self):
-        self.get_logger().warning("Neural Network mode not implemented")
+    def nn_line_detect(self, image):
+        blue_mask, yellow_mask = self.line_detector.detect_lines(image)
+        return blue_mask, yellow_mask
 
     def timer_callback(self):
         try:
@@ -166,11 +172,19 @@ class CameraProcessor(Node):
 
                     blue_mask, yellow_mask = self.hsv_line_detect(image)
 
-                    self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
-                    self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
                 elif (self.line_filter_mode == 'nn'):
-                    self.nn_line_detect()
-    
+                    blue_mask, yellow_mask = self.nn_line_detect(image)
+
+                    if (hasattr(self, 'homography')):
+                        blue_mask = cv2.warpPerspective(blue_mask, self.homography, (self.bwidth, self.bheight))
+                        yellow_mask = cv2.warpPerspective(yellow_mask, self.homography, (self.bwidth, self.bheight))
+                        
+                else:
+                    self.get_logger().error("'" + self.line_filter_mode + "'" + "is not a valid mode, please select 'hsv' or 'nn'")
+
+                self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
+                self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
+
                 if (self.transmit_unfiltered):
                     self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
 
