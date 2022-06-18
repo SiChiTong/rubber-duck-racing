@@ -188,7 +188,6 @@ class CameraProcessor(Node):
                 if (self.transmit_unfiltered):
                     self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
 
-                cv2.waitKey(1)
         except Exception as e:
             self.get_logger().info(str(e)) 
 
