@@ -17,13 +17,13 @@ class CameraProcessor(Node):
         self.calibrate_warp_srv = self.create_service(Empty, 'calibrate_warp', self.calibrate_warp_callback)
         self.refresh_params_srv = self.create_service(Empty, 'refresh_params', self.refresh_params_callback)
 
-        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 10)
-        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 10)
+        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 10)
+        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 10)
         self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, 'unfiltered_feed', 10)
 
         self.declare_parameter('transmit_unfiltered', True)
         
-        self.declare_parameter('line_filter_mode', 'hsv')
+        self.declare_parameter('line_filter_mode', 'nn')
 
         self.yellow_hsv_vals = [25, 54, 60, 32, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
@@ -54,7 +54,7 @@ class CameraProcessor(Node):
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
         self.line_detector = SegNet(
-            model_path='./best_model.pth',
+            model_path='/home/nikita/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/Segnet/best_model.pth',
             res=(384,288)
         )
 
@@ -182,8 +182,8 @@ class CameraProcessor(Node):
                 else:
                     self.get_logger().error("'" + self.line_filter_mode + "'" + "is not a valid mode, please select 'hsv' or 'nn'")
 
-                self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
-                self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
+                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
+                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
 
                 if (self.transmit_unfiltered):
                     self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
