@@ -52,11 +52,11 @@ class HSV_Cam(Node):
     def generateFlatCorners():
         cornersFlat = np.zeros((70, 1, 2))
 
-        for x in range (10):
-            for y in range(7):
+        for x in range (8):
+            for y in range(5):
                 i = y + x * 7
-                cornersFlat[i][0][0] = x * 20
-                cornersFlat[i][0][1] = y * 20
+                cornersFlat[i][0][0] = x * 28
+                cornersFlat[i][0][1] = y * 28
         return cornersFlat
     
     @staticmethod
