@@ -9,7 +9,7 @@ import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
 
-class HSV_Cam(Node):
+class HSVCam(Node):
     def __init__(self):
         super().__init__('hsv_cam')
         
@@ -184,7 +184,7 @@ class HSV_Cam(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    hsv_cam = HSV_Cam()
+    hsv_cam = HSVCam()
 
     rclpy.spin(hsv_cam)
 
