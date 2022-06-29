@@ -21,6 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'hsv_cam = rdrpy.hsv_cam:main',
             'camera_processor = rdrpy.camera_processor:main',
             'camera_viewer = rdrpy.camera_viewer:main',
             'heuristic_controller = rdrpy.heuristic_controller:main',
