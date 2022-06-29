@@ -1,7 +1,7 @@
 from setuptools import setup
 
-package_name = 'robocar_desktop_py'
-submodules = 'robocar_desktop_py/submodules'
+package_name = 'rdrpy'
+submodules = 'rdrpy/submodules'
 
 setup(
     name=package_name,
@@ -21,9 +21,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'camera_processor = robocar_desktop_py.camera_processor:main',
-            'camera_viewer = robocar_desktop_py.camera_viewer:main',
-            'heuristic_controller = robocar_desktop_py.heuristic_controller:main',
+            'camera_processor = rdrpy.camera_processor:main',
+            'camera_viewer = rdrpy.camera_viewer:main',
+            'heuristic_controller = rdrpy.heuristic_controller:main',
         ],
     },
 )
