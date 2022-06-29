@@ -16,8 +16,8 @@ class HSV_Cam(Node):
         self.calibrate_warp_srv = self.create_service(Empty, 'calibrate_warp', self.calibrate_warp_callback)
         self.refresh_params_srv = self.create_service(Empty, 'refresh_params', self.refresh_params_callback)
 
-        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 10)
-        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 10)
+        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 1)
+        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 1)
 
         self.yellow_hsv_vals = [25, 54, 60, 32, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
@@ -39,7 +39,7 @@ class HSV_Cam(Node):
         except Exception as e:
             self.get_logger().info("failed to read warp calibration file, no warp will be applied")
 
-        timer_period = 0.001
+        timer_period = 1 / 60
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.cap = camStream()
@@ -120,7 +120,8 @@ class HSV_Cam(Node):
 
     def hsv_line_detect(self, image):
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        blue_mask = cv2.inRange(hsv_image, 
+        resized_image = cv2.resize(hsv_image, (320, 240), cv2.INTER_NEAREST)
+        blue_mask = cv2.inRange(resized_image, 
             (
                 self.blue_hsv_vals[0],
                 self.blue_hsv_vals[1],
@@ -132,7 +133,7 @@ class HSV_Cam(Node):
                 self.blue_hsv_vals[5]
                 
             ))
-        yellow_mask = cv2.inRange(hsv_image, 
+        yellow_mask = cv2.inRange(resized_image, 
             (
                 self.yellow_hsv_vals[0],
                 self.yellow_hsv_vals[1],
