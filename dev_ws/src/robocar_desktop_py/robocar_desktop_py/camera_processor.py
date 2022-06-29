@@ -5,6 +5,7 @@ from rclpy.node import Node
 import cv2
 import numpy as np
 from .submodules.segnet import SegNet
+from .submodules.gstream import camStream
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -51,7 +52,7 @@ class CameraProcessor(Node):
         timer_period = 0.001
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.cap = cv2.VideoCapture(0)
+        self.cap = camStream()
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
         self.line_detector = SegNet(
