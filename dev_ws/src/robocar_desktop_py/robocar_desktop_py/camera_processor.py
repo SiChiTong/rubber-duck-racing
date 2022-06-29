@@ -23,7 +23,7 @@ class CameraProcessor(Node):
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 10)
         self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, 'unfiltered_feed', 10)
 
-        self.declare_parameter('transmit_unfiltered', True)
+        self.declare_parameter('transmit_unfiltered', False)
         
         self.declare_parameter('line_filter_mode', 'nn')
 
