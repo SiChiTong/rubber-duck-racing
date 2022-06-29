@@ -60,7 +60,8 @@ class CameraProcessor(Node):
                 model_path='/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
                 res=(384,288)
             )
-        except:
+        except Exception as e:
+            self.get_logger().info(str(e))
             self.get_logger().info("failed to initialize line detector, falling back on hsv mode")
             self.line_filter_mode = 'hsv'
 
