@@ -55,10 +55,15 @@ class CameraProcessor(Node):
         self.cap = camStream()
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
-        self.line_detector = SegNet(
-            model_path='/home/' + os.environ.get('USER') + '/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
-            res=(384,288)
-        )
+        try:
+            self.line_detector = SegNet(
+                model_path='/home/' + os.environ.get('USER') + '/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
+                res=(384,288)
+            )
+        except:
+            self.get_logger().info("failed to initialize line detector, falling back on hsv mode")
+            self.line_filter_mode = 'hsv'
+
 
     @staticmethod
     def generateFlatCorners():
