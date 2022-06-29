@@ -69,7 +69,7 @@ class HSV_Cam(Node):
         while (1):
             ret, frame = self.cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            retCorners, cornersReal = cv2.findChessboardCorners(gray, (7, 10))
+            retCorners, cornersReal = cv2.findChessboardCorners(gray, (5, 8))
             cornersFlat = self.generateFlatCorners()
 
             if(retCorners):
