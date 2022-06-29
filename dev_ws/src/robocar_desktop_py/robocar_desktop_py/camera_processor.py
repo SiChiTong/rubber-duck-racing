@@ -57,7 +57,7 @@ class CameraProcessor(Node):
         self.cvb = CvBridge()
         try:
             self.line_detector = SegNet(
-                model_path='/home/' + os.environ.get('USER') + '/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
+                model_path='/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
                 res=(384,288)
             )
         except:
