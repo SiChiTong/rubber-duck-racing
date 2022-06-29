@@ -53,8 +53,10 @@ class CameraProcessor(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.cap = camStream()
+        self.get_logger().info("camera stream initialised")
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
+        self.get_logger().info("CvBridge initialised")
         try:
             self.line_detector = SegNet(
                 model_path='/rubber-duck-racing/dev_ws/src/robocar_desktop_py/robocar_desktop_py/submodules/best_model.pth',
@@ -64,6 +66,9 @@ class CameraProcessor(Node):
             self.get_logger().info(str(e))
             self.get_logger().info("failed to initialize line detector, falling back on hsv mode")
             self.line_filter_mode = 'hsv'
+        else:
+            self.get_logger().info("segnet initialised")
+        
 
 
     @staticmethod
