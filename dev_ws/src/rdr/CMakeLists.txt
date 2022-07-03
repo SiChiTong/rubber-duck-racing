@@ -22,8 +22,21 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(rosidl_default_generators REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
-install(DIRECTORY launch config
+include_directories(include)
+
+add_library(JHPWMPCA9685 SHARED src/JHPWMPCA9685.cpp)
+
+add_executable(motor_driver src/motor_driver.cpp)
+ament_target_dependencies(motor_driver rclcpp geometry_msgs)
+
+install(TARGETS
+  motor_driver
+  JHPWMPCA9685
+  DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
