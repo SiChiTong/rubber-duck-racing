@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'motor_driver = rdrpy.motor_driver:main',
+            'imu = rdrpy.imu:main',
             'hsv_cam = rdrpy.hsv_cam:main',
             'camera_processor = rdrpy.camera_processor:main',
             'camera_viewer = rdrpy.camera_viewer:main',
