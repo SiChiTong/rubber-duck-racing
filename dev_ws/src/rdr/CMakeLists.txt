@@ -36,7 +36,9 @@ ament_target_dependencies(motor_driver rclcpp geometry_msgs)
 install(TARGETS
   motor_driver
   JHPWMPCA9685
-  DIRECTORY launch config
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
