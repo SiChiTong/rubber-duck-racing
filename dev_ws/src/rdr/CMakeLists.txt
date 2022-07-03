@@ -28,15 +28,11 @@ find_package(geometry_msgs REQUIRED)
 
 include_directories(include)
 
-add_library(JHPWMPCA9685 SHARED src/JHPWMPCA9685.cpp)
-
 add_executable(motor_driver src/motor_driver.cpp)
-ament_target_dependencies(motor_driver rclcpp geometry_msgs JHPWMPCA9685)
-target_include_directories(motor_driver include)
+ament_target_dependencies(motor_driver rclcpp geometry_msgs)
 
 install(TARGETS
   motor_driver
-  JHPWMPCA9685
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch config
