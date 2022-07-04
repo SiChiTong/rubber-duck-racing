@@ -50,11 +50,11 @@ class HSVCam(Node):
 
     @staticmethod
     def generateFlatCorners():
-        cornersFlat = np.zeros((70, 1, 2))
+        cornersFlat = np.zeros((40, 1, 2))
 
         for x in range (8):
             for y in range(5):
-                i = y + x * 7
+                i = y + x * 5
                 cornersFlat[i][0][0] = x * 28
                 cornersFlat[i][0][1] = y * 28
         return cornersFlat
@@ -146,20 +146,51 @@ class HSVCam(Node):
                 
             ))
         return blue_mask, yellow_mask
+
+    def hsv_line_detect_cuda(self, image):
+        hsv_image = cv2.cuda.cvtColor(image, cv2.COLOR_BGR2HSV)
+        resized_image = cv2.cuda.resize(hsv_image, (320, 240), cv2.INTER_NEAREST)
+        blue_mask = cv2.cuda.inRange(resized_image, 
+            (
+                self.blue_hsv_vals[0],
+                self.blue_hsv_vals[1],
+                self.blue_hsv_vals[2]
+            ),
+            (
+                self.blue_hsv_vals[3],
+                self.blue_hsv_vals[4],
+                self.blue_hsv_vals[5]
+                
+            ))
+        yellow_mask = cv2.cuda.inRange(resized_image, 
+            (
+                self.yellow_hsv_vals[0],
+                self.yellow_hsv_vals[1],
+                self.yellow_hsv_vals[2]
+            ),
+            (
+                self.yellow_hsv_vals[3],
+                self.yellow_hsv_vals[4],
+                self.yellow_hsv_vals[5]
+                
+            ))
+        return blue_mask, yellow_mask
         
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
             image = self.frame
-            
+            cuda_mat = cv2.cuda_GpuMat()
+            cuda_mat.upload(image)
+
             if (ret):
                 if (hasattr(self, 'homography')):
-                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
+                    cuda_mat = cv2.cuda.warpPerspective(cuda_mat, self.homography, (self.bwidth, self.bheight))
 
-                blue_mask, yellow_mask = self.hsv_line_detect(image)
+                blue_mask, yellow_mask = self.hsv_line_detect_cuda(cuda_mat)
 
-                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
-                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
+                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask.download()))
+                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask.download()))
 
         except Exception as e:
             self.get_logger().info(str(e)) 
