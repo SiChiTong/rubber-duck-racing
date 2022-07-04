@@ -3,7 +3,6 @@ import rclpy
 from rclpy.node import Node
 import cv2
 import numpy as np
-from .submodules.gstream import camStream
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -42,7 +41,7 @@ class HSVCam(Node):
         timer_period = 1 / 60
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.cap = camStream()
+        self.cap = cv2.VideoCapture(0)
         self.get_logger().info("camera stream initialised")
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
@@ -50,11 +49,11 @@ class HSVCam(Node):
 
     @staticmethod
     def generateFlatCorners():
-        cornersFlat = np.zeros((40, 1, 2))
+        cornersFlat = np.zeros((70, 1, 2))
 
         for x in range (8):
             for y in range(5):
-                i = y + x * 5
+                i = y + x * 7
                 cornersFlat[i][0][0] = x * 28
                 cornersFlat[i][0][1] = y * 28
         return cornersFlat
@@ -146,12 +145,12 @@ class HSVCam(Node):
                 
             ))
         return blue_mask, yellow_mask
-
+        
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
             image = self.frame
-
+            
             if (ret):
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))

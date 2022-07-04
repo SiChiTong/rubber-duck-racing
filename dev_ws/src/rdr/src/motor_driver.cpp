@@ -36,10 +36,10 @@ class MotorDriver : public rclcpp::Node
     {
       float linear_x = msg->linear.x;
       float angular_z = msg->angular.z;
-      pca9685->setPWM(0, map(linear_x, -1, 1, servoMin, servoMax));
-      pca9685->setPWM(1, map(angular_z, -1, 1, servoMin, servoMax));
+      pca9685->setPWM(0, 0, map(linear_x, -1, 1, servoMin, servoMax));
+      pca9685->setPWM(1, 0, map(angular_z, -1, 1, servoMin, servoMax));
     }
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_cmd_vel_;
+    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel_;
 };
 
 int main(int argc, char * argv[])
