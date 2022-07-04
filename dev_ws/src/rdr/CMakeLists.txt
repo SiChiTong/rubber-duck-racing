@@ -30,6 +30,9 @@ include_directories(include)
 
 add_executable(motor_driver src/motor_driver.cpp)
 ament_target_dependencies(motor_driver rclcpp geometry_msgs)
+target_link_libraries(motor_driver
+  i2c
+)
 
 install(TARGETS
   motor_driver
