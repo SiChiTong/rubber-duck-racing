@@ -55,8 +55,8 @@ class HSVCam(Node):
         for x in range (8):
             for y in range(5):
                 i = y + x * 5
-                cornersFlat[i][0][0] = x * 28
-                cornersFlat[i][0][1] = y * 28
+                cornersFlat[i][0][0] = x * 3
+                cornersFlat[i][0][1] = y * 3
         return cornersFlat
     
     @staticmethod
@@ -154,7 +154,7 @@ class HSVCam(Node):
 
             if (ret):
                 if (hasattr(self, 'homography')):
-                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
+                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
 
