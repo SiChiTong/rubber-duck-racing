@@ -26,6 +26,7 @@ setup(
             'camera_processor = rdrpy.camera_processor:main',
             'camera_viewer = rdrpy.camera_viewer:main',
             'heuristic_controller = rdrpy.heuristic_controller:main',
+            'point_cloud = rdrpy.point_cloud:main',
         ],
     },
 )
