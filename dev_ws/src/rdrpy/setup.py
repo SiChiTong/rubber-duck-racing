@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'imu = rdrpy.imu:main',
             'hsv_cam = rdrpy.hsv_cam:main',
+            'hsv_cam_desktop = rdrpy.hsv_cam_desktop:main',
             'camera_processor = rdrpy.camera_processor:main',
             'camera_viewer = rdrpy.camera_viewer:main',
             'heuristic_controller = rdrpy.heuristic_controller:main',
