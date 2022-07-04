@@ -147,35 +147,6 @@ class HSVCam(Node):
             ))
         return blue_mask, yellow_mask
 
-    def hsv_line_detect_cuda(self, image):
-        hsv_image = cv2.cuda.cvtColor(image, cv2.COLOR_BGR2HSV)
-        resized_image = cv2.cuda.resize(hsv_image, (320, 240), cv2.INTER_NEAREST)
-        blue_mask = cv2.cuda.inRange(resized_image, 
-            (
-                self.blue_hsv_vals[0],
-                self.blue_hsv_vals[1],
-                self.blue_hsv_vals[2]
-            ),
-            (
-                self.blue_hsv_vals[3],
-                self.blue_hsv_vals[4],
-                self.blue_hsv_vals[5]
-                
-            ))
-        yellow_mask = cv2.cuda.inRange(resized_image, 
-            (
-                self.yellow_hsv_vals[0],
-                self.yellow_hsv_vals[1],
-                self.yellow_hsv_vals[2]
-            ),
-            (
-                self.yellow_hsv_vals[3],
-                self.yellow_hsv_vals[4],
-                self.yellow_hsv_vals[5]
-                
-            ))
-        return blue_mask, yellow_mask
-        
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
@@ -183,7 +154,7 @@ class HSVCam(Node):
 
             if (ret):
                 if (hasattr(self, 'homography')):
-                    image = cv2.cuda.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
+                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
 
