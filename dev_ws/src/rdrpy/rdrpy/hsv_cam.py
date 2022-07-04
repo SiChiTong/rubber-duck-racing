@@ -180,17 +180,15 @@ class HSVCam(Node):
         try:
             ret, self.frame = self.cap.read()
             image = self.frame
-            cuda_mat = cv2.cuda_GpuMat()
-            cuda_mat.upload(image)
 
             if (ret):
                 if (hasattr(self, 'homography')):
-                    cuda_mat = cv2.cuda.warpPerspective(cuda_mat, self.homography, (self.bwidth, self.bheight))
+                    image = cv2.cuda.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
 
-                blue_mask, yellow_mask = self.hsv_line_detect_cuda(cuda_mat)
+                blue_mask, yellow_mask = self.hsv_line_detect(image)
 
-                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask.download()))
-                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask.download()))
+                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
+                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
 
         except Exception as e:
             self.get_logger().info(str(e)) 
