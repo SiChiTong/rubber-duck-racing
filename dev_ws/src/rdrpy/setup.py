@@ -26,6 +26,7 @@ setup(
             'hsv_cam_desktop = rdrpy.hsv_cam_desktop:main',
             'camera_processor = rdrpy.camera_processor:main',
             'camera_viewer = rdrpy.camera_viewer:main',
+            'hsv_tuner = rdrpy.hsv_tuner:main',
             'heuristic_controller = rdrpy.heuristic_controller:main',
             'point_cloud = rdrpy.point_cloud:main',
         ],
