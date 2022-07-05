@@ -5,11 +5,10 @@ from rclpy.node import Node
 
 from sensor_msgs.msg import Imu
 
-
-class MinimalPublisher(Node):
+class IMU(Node):
 
     def __init__(self):
-        super().__init__('minimal_publisher')
+        super().__init__('imu')
         self.publisher_ = self.create_publisher(Imu, 'topic', 10)
         timer_period = 1 / 1000  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -27,12 +26,11 @@ class MinimalPublisher(Node):
         msg.angular_velocity.y = gyro_data['y']
         msg.angular_velocity.z = gyro_data['z']
         self.publisher_.publish(msg)
-        
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    minimal_publisher = IMU()
 
     rclpy.spin(minimal_publisher)
 
@@ -41,7 +39,6 @@ def main(args=None):
     # when the garbage collector destroys the node object)
     minimal_publisher.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
