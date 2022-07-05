@@ -34,11 +34,14 @@ class MotorDriver : public rclcpp::Node
 
     void topic_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const
     {
-      RCLCPP_INFO(this->get_logger(), "Received cmd_vel: %f %f %f", msg->linear.x, msg->angular.z, msg->linear.y);
+      RCLCPP_INFO(this->get_logger(), "Received cmd_vel: %f %f", msg->linear.x, msg->angular.z);
       float linear_x = msg->linear.x;
       float angular_z = msg->angular.z;
-      pca9685->setPWM(0, 0, map(linear_x, -1, 1, servoMin, servoMax));
-      pca9685->setPWM(1, 0, map(angular_z, -1, 1, servoMin, servoMax));
+      int throttle = map(linear_x, -1, 1, servoMin, servoMax);
+      int steering = map(angular_z, -1, 1, servoMin, servoMax);
+      RCLCPP_INFO(this->get_logger(), "Mapped cmd_vel: %d %d", throttle, steering);
+      pca9685->setPWM(0, 0, throttle);
+      pca9685->setPWM(1, 0, steering);
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel_;
 };
