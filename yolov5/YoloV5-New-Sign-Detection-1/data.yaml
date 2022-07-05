@@ -1,6 +1,0 @@
-names:
-- Left
-- Right
-nc: 2
-train: YoloV5-New-Sign-Detection-1/train/images
-val: YoloV5-New-Sign-Detection-1/valid/images

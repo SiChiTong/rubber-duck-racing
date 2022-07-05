@@ -3,7 +3,6 @@ import rclpy
 from rclpy.node import Node
 import cv2
 import numpy as np
-from .submodules.gstream import camStream
 
 import sensor_msgs.msg
 from cv_bridge import CvBridge
@@ -19,9 +18,9 @@ class HSVCam(Node):
         self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 1)
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 1)
 
-        self.yellow_hsv_vals = [0, 30, 30, 70, 255, 255]
+        self.yellow_hsv_vals = [25, 54, 60, 32, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
-        self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
+        self.blue_hsv_vals = [100, 120, 85, 122, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)        
 
         self.declare_parameter('warp_calib_file', 'warp_calib.npz')
@@ -39,10 +38,10 @@ class HSVCam(Node):
         except Exception as e:
             self.get_logger().info("failed to read warp calibration file, no warp will be applied")
 
-        timer_period = 1 / 30
+        timer_period = 1 / 60
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.cap = camStream()
+        self.cap = cv2.VideoCapture(0)
         self.get_logger().info("camera stream initialised")
         ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
@@ -50,13 +49,13 @@ class HSVCam(Node):
 
     @staticmethod
     def generateFlatCorners():
-        cornersFlat = np.zeros((40, 1, 2))
+        cornersFlat = np.zeros((70, 1, 2))
 
         for x in range (8):
             for y in range(5):
-                i = y + x * 5
-                cornersFlat[i][0][0] = x * 3
-                cornersFlat[i][0][1] = y * 3
+                i = y + x * 7
+                cornersFlat[i][0][0] = x * 28
+                cornersFlat[i][0][1] = y * 28
         return cornersFlat
     
     @staticmethod
@@ -146,15 +145,15 @@ class HSVCam(Node):
                 
             ))
         return blue_mask, yellow_mask
-
+        
     def timer_callback(self):
         try:
             ret, self.frame = self.cap.read()
             image = self.frame
-
+            
             if (ret):
                 if (hasattr(self, 'homography')):
-                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
+                    image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
 

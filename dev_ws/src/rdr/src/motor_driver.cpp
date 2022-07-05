@@ -25,19 +25,23 @@ class MotorDriver : public rclcpp::Node
   private:
   int servoMin = 220;
   int servoMax = 520;
-    static int map ( int x, int in_min, int in_max, int out_min, int out_max) {
-        int toReturn =  (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min ;
+    static int map ( float x, int in_min, int in_max, int out_min, int out_max) {
+        float toReturn =  (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min ;
         // For debugging:
         // printf("MAPPED %d to: %d\n", x, toReturn);
-        return toReturn ;
+        return (int)toReturn;
     }
 
     void topic_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const
     {
+      RCLCPP_INFO(this->get_logger(), "Received cmd_vel: %f %f", msg->linear.x, msg->angular.z);
       float linear_x = msg->linear.x;
       float angular_z = msg->angular.z;
-      pca9685->setPWM(0, 0, map(linear_x, -1, 1, servoMin, servoMax));
-      pca9685->setPWM(1, 0, map(angular_z, -1, 1, servoMin, servoMax));
+      int throttle = map(linear_x, -1, 1, servoMin, servoMax);
+      int steering = map(angular_z, -1, 1, servoMin, servoMax);
+      RCLCPP_INFO(this->get_logger(), "Mapped cmd_vel: %d %d", throttle, steering);
+      pca9685->setPWM(0, 0, throttle);
+      pca9685->setPWM(1, 0, steering);
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel_;
 };

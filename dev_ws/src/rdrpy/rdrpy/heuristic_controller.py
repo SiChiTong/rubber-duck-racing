@@ -1,4 +1,6 @@
 from distutils.log import error
+import math
+from cv2 import sqrt
 import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
@@ -17,25 +19,25 @@ class HeuristicController(Node):
         self.pub_cmd_vel = self.create_publisher(Twist, 'cmd_vel', 10)
 
         self.subscription_blue = self.create_subscription(
-            sensor_msgs.msg.CompressedImage,
+            sensor_msgs.msg.Image,
             'blue_feed',
             self.listener_callback_blue,
             10)
         self.subscription_yellow = self.create_subscription(
-            sensor_msgs.msg.CompressedImage,
+            sensor_msgs.msg.Image,
             'yellow_feed',
             self.listener_callback_yellow,
             10)
         self.yellow_frame = np.zeros((640, 480))
         self.blue_frame = np.zeros((640, 480))
 
-        self.declare_parameter('midpoint_segments', 16)
+        self.declare_parameter('midpoint_segments', 12)
         self.midpoint_segments = self.get_parameter('midpoint_segments').get_parameter_value().integer_value
-        self.declare_parameter('blue_is_left', True)
+        self.declare_parameter('blue_is_left', False)
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
-        self.declare_parameter('track_width', 400)
+        self.declare_parameter('track_width', 60)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
         self.declare_parameter('base_throttle', 0.2)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
@@ -44,8 +46,8 @@ class HeuristicController(Node):
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
-        yellowDot = (125, 255, 255)
-        blueDot = (255, 125, 125)
+        yellowDot = (0, 255, 255)
+        blueDot = (255, 0, 0)
         centerDot = (255, 255, 255)
         centerLine = (0, 0, 255)
 
@@ -81,11 +83,14 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                M = cv2.moments(cont)
-                try:
-                    blueX = int(M['m10']/M['m00'])
-                except:
+                if (cv2.contourArea(cont) < 4):
                     blueRet = False
+                else:
+                    M = cv2.moments(cont)
+                    try:
+                        blueX = int(M['m10']/M['m00'])
+                    except:
+                        blueRet = False
             else:
                 blueRet = False
 
@@ -121,6 +126,13 @@ class HeuristicController(Node):
             for x in range(imsizeX):
                 y = int(a * x**2  +  b * x  +  c)
                 cv2.circle(f, (x, y), 3, (0, 255, 0), -1)
+            y = imsizeY/2
+            x = -((b+sqrt(b*b-4*a*c+4*a*y))/(2*a))
+            if (math.isnan(x[1])):
+                x[1] = 0
+            cv2.imshow("frame", f)
+            cv2.waitKey(1)
+            return int(x[1])
             
         else:
             cv2.circle(f, (int(midPoints[3]), verticalPoints[3]), 10, (0, 255, 0), -1)
@@ -129,21 +141,21 @@ class HeuristicController(Node):
             return midPoints[3]
 
     def listener_callback_blue(self, msg):
-        self.blue_frame = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = self.cvb.imgmsg_to_cv2(msg)
+        self.blue_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_blue", self.blue_frame)
-        cv2.waitKey(1)
-        #self.get_logger().info("recieved blue frame")        
+        cv2.waitKey(1)    
 
     def listener_callback_yellow(self, msg):
-        self.yellow_frame = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = self.cvb.imgmsg_to_cv2(msg)
+        self.yellow_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_yellow", self.yellow_frame)
         cv2.waitKey(1)
-        #self.get_logger().info("recieved yellow frame")
         twist = Twist()
         twist.linear.x = self.base_throttle
         pidError = self.calculate_steering()
-        twist.angular.z = self.pid(pidError)
-        self.pub_cmd_vel.publish(twist)
+        #twist.angular.z = self.pid(pidError)
+        #self.pub_cmd_vel.publish(twist)
 
 def main(args=None):
     rclpy.init(args=args)
