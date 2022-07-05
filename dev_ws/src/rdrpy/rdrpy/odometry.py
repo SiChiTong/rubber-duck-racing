@@ -1,4 +1,3 @@
-from locale import currency
 import rclpy
 from rclpy.node import Node
 
@@ -6,6 +5,8 @@ from geometry.msg import Twist
 from sensor_msgs.msg import Odometry
 
 import math
+
+import Jetson.GPIO as GPIO
 
 class Encoder(Node):
 
@@ -15,6 +16,15 @@ class Encoder(Node):
         self.subscriber = self.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
         timer_period = 1 / 60  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
+        
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(21, GPIO.IN)
+        GPIO.add_event_detect(21, GPIO.RISING, callback=self.get_rpm)
+        
+        self.count = 0
+        self.start_time = self.rclpy.Time.now().to_sec()
+        self.sample_rate = 20
+        self.circumference = 0.1
 
         self.wheelbase = 0.3
         self.speed = 0.0
@@ -24,6 +34,14 @@ class Encoder(Node):
         self.x = 0.0
         self.y = 0.0
         self.yaw = 0.0
+
+    def get_rpm(self):
+        self.count += 1
+        if self.count == self.sample_rate:
+            end_time = self.rclpy.Time.now().to_sec()
+            delta = self.start_time - end_time
+            rps = self.count / delta
+            self.speed = rps * self.circumference
 
     def cmd_vel_callback(self, msg):
         self.motor_angle = msg.angular.z
@@ -53,8 +71,8 @@ class Encoder(Node):
         odom.twist.twist.linear.y = 0.0
         odom.twist.twist.angular.z = angular_velocity
 
-
-
+        odom.header.stamp = self.timer.last_called
+        self.publisher_.publish(odom)
 
 def main(args=None):
     rclpy.init(args=args)
@@ -68,7 +86,6 @@ def main(args=None):
     # when the garbage collector destroys the node object)
     minimal_publisher.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
