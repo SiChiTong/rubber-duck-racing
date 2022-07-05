@@ -34,7 +34,7 @@ class MotorDriver : public rclcpp::Node
 
     void topic_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const
     {
-      RCLPP_INFO(this->get_logger(), "Received cmd_vel: %f %f %f", msg->linear.x, msg->angular.z, msg->linear.y);
+      RCLCPP_INFO(this->get_logger(), "Received cmd_vel: %f %f %f", msg->linear.x, msg->angular.z, msg->linear.y);
       float linear_x = msg->linear.x;
       float angular_z = msg->angular.z;
       pca9685->setPWM(0, 0, map(linear_x, -1, 1, servoMin, servoMax));
