@@ -21,6 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'odom = rdrpy.odometry:main',
             'imu = rdrpy.imu:main',
             'hsv_cam = rdrpy.hsv_cam:main',
             'hsv_cam_desktop = rdrpy.hsv_cam_desktop:main',
