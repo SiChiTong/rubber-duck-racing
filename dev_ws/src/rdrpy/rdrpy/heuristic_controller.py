@@ -1,4 +1,3 @@
-from distutils.log import error
 import math
 from cv2 import sqrt
 import rclpy
@@ -6,6 +5,7 @@ from rclpy.node import Node
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist 
 import sensor_msgs.msg
+from std_msgs.msg import Int8
 
 import cv2
 import numpy as np
@@ -31,6 +31,13 @@ class HeuristicController(Node):
         self.yellow_frame = np.zeros((640, 480))
         self.blue_frame = np.zeros((640, 480))
 
+        self.subscription_sign = self.create_subscription(
+            Int8,
+            'sign_detection'
+            self.listener_callback_sign,
+            10)
+        self.sign_detection = 0
+
         self.declare_parameter('midpoint_segments', 12)
         self.midpoint_segments = self.get_parameter('midpoint_segments').get_parameter_value().integer_value
         self.declare_parameter('blue_is_left', False)
@@ -41,6 +48,8 @@ class HeuristicController(Node):
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
         self.declare_parameter('base_throttle', 0.2)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
+        self.declare_parameter('hug_distance', 20)
+        self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         
         self.pid = PID(1, 0.1, 0.05, setpoint=0)
         self.pid.proportional_on_measurement = True
@@ -64,6 +73,7 @@ class HeuristicController(Node):
         f = np.zeros((imsizeY, imsizeX, 3))
 
         for i in range(self.midpoint_segments):
+            midX = imsizeX//2
             blue_cropped = self.blue_frame[imsizeY-predictionHeight*(i+1):imsizeY-predictionHeight*i]
             yellow_cropped = self.yellow_frame[imsizeY-predictionHeight*(i+1):imsizeY-predictionHeight*i]
 
@@ -116,6 +126,11 @@ class HeuristicController(Node):
                 cv2.circle(f, (blueX, circleY), 3, blueDot, -1)
                 cv2.circle(f, (midX, circleY), 3, centerDot, -1)
 
+            if (self.sign_detection == 1):
+                midX - self.hug_distance
+            else (self.sign_detection == 2):
+                midX + self.hug_distance
+
             midPoints[i] = midX 
 
         if (self.use_polyfit):
@@ -154,8 +169,13 @@ class HeuristicController(Node):
         twist = Twist()
         twist.linear.x = self.base_throttle
         pidError = self.calculate_steering()
-        #twist.angular.z = self.pid(pidError)
+        angle = self.pid(pidError)
+        twist.angular.z = angle
+        self.get_logger().info("Publishing Angle: %f", angle)
         #self.pub_cmd_vel.publish(twist)
+
+    def listener_callback_sign(self, msg):
+        self.sign_detection = msg.data
 
 def main(args=None):
     rclpy.init(args=args)

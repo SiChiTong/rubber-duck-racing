@@ -1,3 +1,4 @@
+FROM dustynv/ros:foxy-pytorch-l4t-r34.1.1
 RUN sudo apt-get update
 RUN sudo apt-get upgrade
 RUN sudo apt-get install nano libi2c-dev i2c-tools
