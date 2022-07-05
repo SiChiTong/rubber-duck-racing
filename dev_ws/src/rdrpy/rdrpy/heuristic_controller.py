@@ -33,7 +33,7 @@ class HeuristicController(Node):
 
         self.subscription_sign = self.create_subscription(
             Int8,
-            'sign_detection'
+            'sign_detection',
             self.listener_callback_sign,
             10)
         self.sign_detection = 0
@@ -127,9 +127,9 @@ class HeuristicController(Node):
                 cv2.circle(f, (midX, circleY), 3, centerDot, -1)
 
             if (self.sign_detection == 1):
-                midX - self.hug_distance
-            else (self.sign_detection == 2):
-                midX + self.hug_distance
+                midX = midX - self.hug_distance
+            elif (self.sign_detection == 2):
+                midX = midX + self.hug_distance
 
             midPoints[i] = midX 
 
