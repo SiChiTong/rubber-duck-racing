@@ -19,12 +19,12 @@ class HeuristicController(Node):
         self.pub_cmd_vel = self.create_publisher(Twist, 'cmd_vel', 10)
 
         self.subscription_blue = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'blue_feed',
             self.listener_callback_blue,
             10)
         self.subscription_yellow = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'yellow_feed',
             self.listener_callback_yellow,
             10)
@@ -156,13 +156,13 @@ class HeuristicController(Node):
             return (midPoints[3] - imsizeX / 2)/70
 
     def listener_callback_blue(self, msg):
-        image = self.cvb.imgmsg_to_cv2(msg)
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
         self.blue_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_blue", self.blue_frame)
         cv2.waitKey(1)    
 
     def listener_callback_yellow(self, msg):
-        image = self.cvb.imgmsg_to_cv2(msg)
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
         self.yellow_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_yellow", self.yellow_frame)
         cv2.waitKey(1)

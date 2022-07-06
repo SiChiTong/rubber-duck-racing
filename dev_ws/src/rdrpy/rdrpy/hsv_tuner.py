@@ -15,17 +15,17 @@ class HSVTuner(Node):
     def __init__(self):
         super().__init__('hsv_tuner')
         self.subscription_blue = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'blue_feed',
             self.listener_callback_blue,
             10)
         self.subscription_yellow = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'yellow_feed',
             self.listener_callback_yellow,
             10)
         self.subscription_unfiltered = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'unfiltered_feed',
             self.listener_callback_unfiltered,
             10)
@@ -38,14 +38,14 @@ class HSVTuner(Node):
         cv2.createTrackbar('Vmax', 'recieve_unfiltered', 0, 255, self.nothing)
 
     def listener_callback_blue(self, msg):
-        frame = cvb.imgmsg_to_cv2(msg)
+        frame = cvb.compressed_imgmsg_to_cv2(msg)
         #frame = cv2.resize(frame, (frame.shape[1] * 4, frame.shape[0] * 4), cv2.INTER_NEAREST)
         cv2.imshow("recieve_blue", frame)
         cv2.waitKey(1)
         #self.get_logger().info("recieved frame")
 
     def listener_callback_yellow(self, msg):
-        frame = cvb.imgmsg_to_cv2(msg)
+        frame = cvb.compressed_imgmsg_to_cv2(msg)
         #frame = cv2.resize(frame, (frame.shape[1] * 4, frame.shape[0] * 4), cv2.INTER_NEAREST)
         cv2.imshow("recieve_yellow", frame)
         cv2.waitKey(1)
@@ -59,7 +59,7 @@ class HSVTuner(Node):
         Vmin = cv2.getTrackbarPos('Vmin', 'recieve_unfiltered')
         Vmax = cv2.getTrackbarPos('Vmax', 'recieve_unfiltered')
 
-        frame = cvb.imgmsg_to_cv2(msg)
+        frame = cvb.compressed_imgmsg_to_cv2(msg)
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, (Hmin, Smin, Vmin), (Hmax, Smax, Vmax))
