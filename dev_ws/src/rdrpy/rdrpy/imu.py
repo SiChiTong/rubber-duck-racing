@@ -4,6 +4,9 @@ import rclpy
 from rclpy.node import Node
 
 from sensor_msgs.msg import Imu
+from tf.transformations import *
+
+
 
 class IMU(Node):
 
@@ -13,10 +16,14 @@ class IMU(Node):
         timer_period = 1 / 1000  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.mpu = mpu6050(0x68)
+        self.prevrot = quaternion_from_euler(0, 0, 0)
 
     def timer_callback(self):
         msg = Imu()
         msg.header.stamp = rclpy.Time.now()
+
+        
+
         accel_data = self.mpu.get_accel_data()
         gyro_data = self.mpu.get_gyro_data()
         msg.linear_acceleration.x = accel_data['x']
@@ -25,6 +32,10 @@ class IMU(Node):
         msg.angular_velocity.x = gyro_data['x']
         msg.angular_velocity.y = gyro_data['y']
         msg.angular_velocity.z = gyro_data['z']
+
+        q_rot = quaternion_from_euler(msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z)
+        msg.orientation = quaternion_multiply(q_rot, self.prevrot)
+
         self.publisher_.publish(msg)
 
 def main(args=None):

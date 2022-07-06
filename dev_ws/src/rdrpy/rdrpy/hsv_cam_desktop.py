@@ -3,10 +3,12 @@ import rclpy
 from rclpy.node import Node
 import cv2
 import numpy as np
-
+import torch
 import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
+from submodules.yutils import YUtils
+
 
 class HSVCam(Node):
     def __init__(self):
@@ -25,6 +27,8 @@ class HSVCam(Node):
 
         self.declare_parameter('warp_calib_file', 'warp_calib.npz')
         self.declare_parameter('warp_calib_save', 'warp_calib')
+        
+        self.yutils = YUtils()
 
         self.yellow_hsv_vals = self.get_parameter('yellow_hsv_vals').get_parameter_value().integer_array_value
         self.blue_hsv_vals = self.get_parameter('blue_hsv_vals').get_parameter_value().integer_array_value
@@ -154,9 +158,11 @@ class HSVCam(Node):
             if (ret):
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight))
-
+                
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
 
+                print(self.yutils.detect(image))
+                
                 self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
 
