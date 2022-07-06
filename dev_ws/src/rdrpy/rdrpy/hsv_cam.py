@@ -19,9 +19,9 @@ class HSVCam(Node):
         self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 1)
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 1)
 
-        self.yellow_hsv_vals = [15, 80, 160, 60, 255, 255]
+        self.yellow_hsv_vals = [0, 30, 30, 70, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
-        self.blue_hsv_vals = [90, 100, 115, 115, 255, 255]
+        self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)        
 
         self.declare_parameter('warp_calib_file', 'warp_calib.npz')
