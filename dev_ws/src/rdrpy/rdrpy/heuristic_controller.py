@@ -171,7 +171,7 @@ class HeuristicController(Node):
         pidError = self.calculate_steering()
         angle = self.pid(pidError)
         twist.angular.z = angle
-        self.get_logger().info("Publishing Angle: %f", angle)
+        self.get_logger().info(str(angle))
         #self.pub_cmd_vel.publish(twist)
 
     def listener_callback_sign(self, msg):
