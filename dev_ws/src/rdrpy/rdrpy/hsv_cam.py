@@ -39,7 +39,7 @@ class HSVCam(Node):
         except Exception as e:
             self.get_logger().info("failed to read warp calibration file, no warp will be applied")
 
-        timer_period = 1 / 60
+        timer_period = 1 / 30
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.cap = camStream()
