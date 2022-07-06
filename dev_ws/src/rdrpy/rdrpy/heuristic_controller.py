@@ -40,13 +40,13 @@ class HeuristicController(Node):
 
         self.declare_parameter('midpoint_segments', 12)
         self.midpoint_segments = self.get_parameter('midpoint_segments').get_parameter_value().integer_value
-        self.declare_parameter('blue_is_left', False)
+        self.declare_parameter('blue_is_left', True)
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
         self.declare_parameter('track_width', 60)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.2)
+        self.declare_parameter('base_throttle', 0.3)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 20)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
@@ -153,7 +153,7 @@ class HeuristicController(Node):
             cv2.circle(f, (int(midPoints[3]), verticalPoints[3]), 10, (0, 255, 0), -1)
             cv2.imshow("frame", f)
             cv2.waitKey(1)
-            return midPoints[3]
+            return (midPoints[3] - imsizeX / 2)/70
 
     def listener_callback_blue(self, msg):
         image = self.cvb.imgmsg_to_cv2(msg)
@@ -168,11 +168,15 @@ class HeuristicController(Node):
         cv2.waitKey(1)
         twist = Twist()
         twist.linear.x = self.base_throttle
-        pidError = self.calculate_steering()
-        angle = self.pid(pidError)
-        twist.angular.z = angle
-        self.get_logger().info(str(angle))
-        #self.pub_cmd_vel.publish(twist)
+        try:
+            pidError = self.calculate_steering()
+            angle = self.pid(pidError)
+            twist.angular.z = pidError * 1
+            self.get_logger().info(str(pidError * 1))
+        except Exception as e:
+            print(str(e))
+            twist.linear.x = 0.0
+        self.pub_cmd_vel.publish(twist)
 
     def listener_callback_sign(self, msg):
         self.sign_detection = msg.data

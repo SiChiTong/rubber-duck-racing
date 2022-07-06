@@ -120,8 +120,7 @@ class HSVCam(Node):
 
     def hsv_line_detect(self, image):
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        resized_image = cv2.resize(hsv_image, (320, 240), cv2.INTER_NEAREST)
-        blue_mask = cv2.inRange(resized_image, 
+        blue_mask = cv2.inRange(hsv_image, 
             (
                 self.blue_hsv_vals[0],
                 self.blue_hsv_vals[1],
@@ -133,7 +132,7 @@ class HSVCam(Node):
                 self.blue_hsv_vals[5]
                 
             ))
-        yellow_mask = cv2.inRange(resized_image, 
+        yellow_mask = cv2.inRange(hsv_image, 
             (
                 self.yellow_hsv_vals[0],
                 self.yellow_hsv_vals[1],
@@ -145,6 +144,8 @@ class HSVCam(Node):
                 self.yellow_hsv_vals[5]
                 
             ))
+        blue_mask = cv2.resize(blue_mask, (blue_mask.shape[1]//3, blue_mask.shape[0]//3), cv2.INTER_NEAREST)
+        yellow_mask = cv2.resize(yellow_mask, (yellow_mask.shape[1]//3, yellow_mask.shape[0]//3), cv2.INTER_NEAREST)
         return blue_mask, yellow_mask
 
     def timer_callback(self):
@@ -157,12 +158,12 @@ class HSVCam(Node):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
-
+                self.get_logger().info("Publishing frame. Frame size: " + str(blue_mask.shape))
                 self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
 
         except Exception as e:
-            self.get_logger().info(str(e)) 
+            self.get_logger().error(str(e)) 
 
     def calibrate_warp_callback(self, request, response):
         self.get_logger().info('Request to calibrate recieved')
