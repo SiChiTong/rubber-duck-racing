@@ -144,8 +144,8 @@ class HSVCam(Node):
                 self.yellow_hsv_vals[5]
                 
             ))
-        blue_mask = cv2.resize(blue_mask, (blue_mask.shape[1]//3, blue_mask.shape[0]//3), cv2.INTER_NEAREST)
-        yellow_mask = cv2.resize(yellow_mask, (yellow_mask.shape[1]//3, yellow_mask.shape[0]//3), cv2.INTER_NEAREST)
+        blue_mask = cv2.resize(blue_mask, (blue_mask.shape[1]//1.5, blue_mask.shape[0]//1.5), cv2.INTER_NEAREST)
+        yellow_mask = cv2.resize(yellow_mask, (yellow_mask.shape[1]//1.5, yellow_mask.shape[0]//1.5), cv2.INTER_NEAREST)
         return blue_mask, yellow_mask
 
     def timer_callback(self):
