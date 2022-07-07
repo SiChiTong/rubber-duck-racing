@@ -10,7 +10,7 @@ class YUtils():
         self.object_colors = list(np.random.rand(80,3)*255)
         self.input_width = 320
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.yolo_model = attempt_load(weights="/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/best.pt").to(self.device)
+        self.yolo_model = attempt_load(weights="root/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/best.pt").to(self.device)
 
     def detect(self, image):
         height, width = image.shape[:2]
