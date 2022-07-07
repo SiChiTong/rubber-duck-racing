@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 
 from .common import Conv
-from .utils.downloads import attempt_download
+from rdrpy.submodules.utils.downloads import attempt_download
 
 
 class Sum(nn.Module):
