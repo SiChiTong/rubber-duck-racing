@@ -1,4 +1,4 @@
-from submodules.mpu6050 import mpu6050
+from .submodules.mpu6050 import mpu6050
 
 import rclpy
 from rclpy.node import Node

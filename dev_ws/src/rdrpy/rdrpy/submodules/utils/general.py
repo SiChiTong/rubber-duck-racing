@@ -33,8 +33,8 @@ import torch
 import torchvision
 import yaml
 
-from submodules.utils.downloads import gsutil_getsize
-from submodules.utils.metrics import box_iou, fitness
+from .submodules.utils.downloads import gsutil_getsize
+from .submodules.utils.metrics import box_iou, fitness
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory

@@ -1,5 +1,5 @@
-from submodules.utils.general import non_max_suppression
-from submodules.models.experimental import attempt_load
+from .submodules.utils.general import non_max_suppression
+from .submodules.models.experimental import attempt_load
 import numpy as np
 import torch
 import cv2

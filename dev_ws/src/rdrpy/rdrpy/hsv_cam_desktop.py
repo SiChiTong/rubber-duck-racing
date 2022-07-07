@@ -7,7 +7,7 @@ import torch
 import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
-from submodules.yutils import YUtils
+from .submodules.yutils import YUtils
 
 
 class HSVCam(Node):
