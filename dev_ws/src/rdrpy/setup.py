@@ -2,11 +2,13 @@ from setuptools import setup
 
 package_name = 'rdrpy'
 submodules = 'rdrpy/submodules'
+utils = 'rdrpy/submodules/utils'
+models = 'rdrpy/submodules/models'
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name, submodules],
+    packages=[package_name, submodules, utils, models],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
