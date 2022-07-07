@@ -4,7 +4,9 @@ from rclpy.node import Node
 import cv2
 import numpy as np
 from .submodules.gstream import camStream
+from .submodules.yutils import YUtils
 
+import std_msgs.msg
 import sensor_msgs.msg
 from cv_bridge import CvBridge
 from std_srvs.srv import Empty
@@ -18,7 +20,7 @@ class HSVCam(Node):
 
         self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 1)
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 1)
-
+        self.pub_sign_detection = self.create_publisher(std_msgs.msg.Int8, 'sign_detection', 10)
         self.yellow_hsv_vals = [0, 30, 30, 70, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
         self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
@@ -41,7 +43,8 @@ class HSVCam(Node):
 
         timer_period = 1 / 30
         self.timer = self.create_timer(timer_period, self.timer_callback)
-
+        self.yutils = YUtils()
+        self.get_logger().info("YUtils initialized")
         self.cap = camStream()
         self.get_logger().info("camera stream initialised")
         ret, self.frame = self.cap.read()
@@ -154,6 +157,7 @@ class HSVCam(Node):
             image = self.frame
 
             if (ret):
+                sign_detect_value = self.yutils.detect(image)
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
@@ -161,7 +165,7 @@ class HSVCam(Node):
                 self.get_logger().info("Publishing frame. Frame size: " + str(blue_mask.shape))
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
-
+                self.pub_sign_detect.publish(sign_detect_value)
         except Exception as e:
             self.get_logger().error(str(e)) 
 
