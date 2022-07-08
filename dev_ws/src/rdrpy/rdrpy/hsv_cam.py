@@ -163,7 +163,7 @@ class HSVCam(Node):
                 self.get_logger().info("Publishing frame. Frame size: " + str(blue_mask.shape))
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
-                self.pub_sign_detect.publish(sign_detect_value)
+                self.pub_sign_detection.publish(sign_detect_value)
         except Exception as e:
             self.get_logger().error(str(e)) 
 
