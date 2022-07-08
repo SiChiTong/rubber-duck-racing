@@ -26,7 +26,7 @@ class MotorDriver : public rclcpp::Node
   int servoMin = 300;
   int servoMax = 520;
   int escMin = 300;
-  int escMax = 52a0;
+  int escMax = 520;
   
     static int map ( float x, int in_min, int in_max, int out_min, int out_max) {
         float toReturn =  (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min ;
