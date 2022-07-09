@@ -43,8 +43,8 @@ class MotorDriver : public rclcpp::Node
       int throttle = map(linear_x, -1, 1, escMin, escMax);
       int steering = map(angular_z, 1, -1, servoMin, servoMax);
       RCLCPP_INFO(this->get_logger(), "Mapped cmd_vel: %d %d", throttle, steering);
-      pca9685->setPWM(0, 0, throttle);
-      pca9685->setPWM(1, 0, steering);
+      pca9685->setPWM(15, 0, throttle);
+      pca9685->setPWM(0, 0, steering);
     }
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmd_vel_;
 };
