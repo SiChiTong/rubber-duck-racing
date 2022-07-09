@@ -130,6 +130,9 @@ class HeuristicController(Node):
                 midX = midX - self.hug_distance
             elif (self.sign_detection == 2):
                 midX = midX + self.hug_distance
+                midX -= self.hug_distance
+            elif (self.sign_detection == 2):
+                midX += self.hug_distance
 
             midPoints[i] = midX 
 

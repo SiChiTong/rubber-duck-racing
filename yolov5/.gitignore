@@ -23,6 +23,10 @@
 !setup.cfg
 !cfg/yolov3*.cfg
 
+test/*
+train/*
+valid/*
+
 storage.googleapis.com
 data/*
 data/images/*
