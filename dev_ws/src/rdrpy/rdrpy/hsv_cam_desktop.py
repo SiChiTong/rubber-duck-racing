@@ -161,7 +161,7 @@ class HSVCam(Node):
                 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
 
-                print(self.yutils.detect(image))
+                print(self.yutils.detect(image, True, 0.60))
                 
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))

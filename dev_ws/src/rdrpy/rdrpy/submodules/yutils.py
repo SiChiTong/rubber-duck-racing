@@ -6,13 +6,13 @@ import cv2
 
 class YUtils():
     def __init__(self):
-        self.classes = ['Right', 'Left']
+        self.classes = ['Left', 'Right1']
         self.object_colors = list(np.random.rand(80,3)*255)
-        self.input_width = 320
+        self.input_width = 160
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.yolo_model = attempt_load(weights="/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/best.pt").to(self.device)
+        self.yolo_model = attempt_load(weights="/home/jared/rubber-duck-racing/yolov5/runs/train/exp12/weights/best.pt").to(self.device)
 
-    def detect(self, image):
+    def detect(self, image, visualise, minScore):
         height, width = image.shape[:2]
         new_height = int((((self.input_width/width)*height)//32)*32)
 
@@ -29,8 +29,11 @@ class YUtils():
         if pred[0] is not None and len(pred):
             for p in pred[0]:
                 score = np.round(p[4].cpu().detach().numpy(),2)
-                if(score >= 0.90):
+                
+                
                     
+                
+                if(visualise and score >= minScore):
                     label = self.classes[int(p[5])]
                     xmin = int(p[0] * image.shape[1] /self.input_width)
                     ymin = int(p[1] * image.shape[0] /new_height)
@@ -39,6 +42,11 @@ class YUtils():
                     color = self.object_colors[self.classes.index(label)]
                     image = cv2.rectangle(image, (xmin,ymin), (xmax,ymax), color, 2) 
                     image = cv2.putText(image, f'{label} ({str(score)})', (xmin,ymin), cv2.FONT_HERSHEY_SIMPLEX , 0.75, color, 1, cv2.LINE_AA)
+                    
+                elif (score >= minScore):
                     return int(p[5])+1
+        if(visualise):
+            cv2.imshow("image",image)
+            cv2.waitKey(1)
         return 0
 
