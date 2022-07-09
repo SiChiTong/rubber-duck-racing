@@ -19,9 +19,9 @@ class CameraProcessor(Node):
         self.calibrate_warp_srv = self.create_service(Empty, 'calibrate_warp', self.calibrate_warp_callback)
         self.refresh_params_srv = self.create_service(Empty, 'refresh_params', self.refresh_params_callback)
 
-        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.Image, 'blue_feed', 10)
-        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.Image, 'yellow_feed', 10)
-        self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.Image, 'unfiltered_feed', 10)
+        self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 10)
+        self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 10)
+        self.pub_img_unfliltered = self.create_publisher(sensor_msgs.msg.CompressedImage, 'unfiltered_feed', 10)
 
         self.declare_parameter('transmit_unfiltered', False)
         
@@ -195,11 +195,11 @@ class CameraProcessor(Node):
                 else:
                     self.get_logger().error("'" + self.line_filter_mode + "'" + "is not a valid mode, please select 'hsv' or 'nn'")
 
-                self.pub_blue_img.publish(self.cvb.cv2_to_imgmsg(blue_mask))
-                self.pub_yellow_img.publish(self.cvb.cv2_to_imgmsg(yellow_mask))
+                self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
+                self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
 
                 if (self.transmit_unfiltered):
-                    self.pub_img_unfliltered.publish(self.cvb.cv2_to_imgmsg(self.frame))
+                    self.pub_img_unfliltered.publish(self.cvb.cv2_to_compressed_imgmsg(self.frame))
 
         except Exception as e:
             self.get_logger().info(str(e)) 

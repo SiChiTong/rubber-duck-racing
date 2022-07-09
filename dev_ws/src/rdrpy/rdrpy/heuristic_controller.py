@@ -19,12 +19,12 @@ class HeuristicController(Node):
         self.pub_cmd_vel = self.create_publisher(Twist, 'cmd_vel', 10)
 
         self.subscription_blue = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'blue_feed',
             self.listener_callback_blue,
             10)
         self.subscription_yellow = self.create_subscription(
-            sensor_msgs.msg.Image,
+            sensor_msgs.msg.CompressedImage,
             'yellow_feed',
             self.listener_callback_yellow,
             10)
@@ -44,14 +44,14 @@ class HeuristicController(Node):
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
-        self.declare_parameter('track_width', 60)
+        self.declare_parameter('track_width', 105)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.2)
+        self.declare_parameter('base_throttle', 0.465)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
-        self.declare_parameter('hug_distance', 20)
+        self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
-        
-        self.pid = PID(1, 0.1, 0.05, setpoint=0)
+        self.midPointOffset = -12
+        self.pid = PID(-3.75, -0, -1.5, setpoint=0.0)
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -63,7 +63,7 @@ class HeuristicController(Node):
         imsizeX = self.blue_frame.shape[1]
         imsizeY = self.blue_frame.shape[0]
 
-        midX = imsizeX//2
+        midX = imsizeX//2 + self.midPointOffset
 
         predictionHeight = imsizeY//self.midpoint_segments
 
@@ -73,7 +73,7 @@ class HeuristicController(Node):
         f = np.zeros((imsizeY, imsizeX, 3))
 
         for i in range(self.midpoint_segments):
-            midX = imsizeX//2
+            midX = imsizeX//2 + self.midPointOffset
             blue_cropped = self.blue_frame[imsizeY-predictionHeight*(i+1):imsizeY-predictionHeight*i]
             yellow_cropped = self.yellow_frame[imsizeY-predictionHeight*(i+1):imsizeY-predictionHeight*i]
 
@@ -81,11 +81,14 @@ class HeuristicController(Node):
             if len(yellowCont) > 0:
                 yellowRet = True
                 cont = max(yellowCont, key = cv2.contourArea)
-                M = cv2.moments(cont)
-                try:
-                    yellowX = int(M['m10']/M['m00'])
-                except:
+                if (cv2.contourArea(cont) < 25):
                     yellowRet = False
+                else:
+                    M = cv2.moments(cont)
+                    try:
+                        yellowX = int(M['m10']/M['m00'])
+                    except:
+                        yellowRet = False
             else:
                 yellowRet = False
 
@@ -93,7 +96,7 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 4):
+                if (cv2.contourArea(cont) < 25):
                     blueRet = False
                 else:
                     M = cv2.moments(cont)
@@ -104,7 +107,7 @@ class HeuristicController(Node):
             else:
                 blueRet = False
 
-            cv2.line(f, (imsizeX//2, 0), (imsizeX//2, imsizeY), centerLine, 3)
+            cv2.line(f, (imsizeX//2 + self.midPointOffset, 0), (imsizeX//2 + self.midPointOffset, imsizeY), centerLine, 3)
             if (self.blue_is_left):
                 addVal = 1
             else:
@@ -153,29 +156,41 @@ class HeuristicController(Node):
             return int(x[1])
             
         else:
-            cv2.circle(f, (int(midPoints[3]), verticalPoints[3]), 10, (0, 255, 0), -1)
+            cv2.circle(f, (int(midPoints[5]), verticalPoints[5]), 10, (0, 255, 0), -1)
             cv2.imshow("frame", f)
             cv2.waitKey(1)
-            return midPoints[3]
+            publish_num = 0.0
+            for x in midPoints:
+                publish_num += x
+            publish_num = publish_num/self.midpoint_segments
+            publish_num = (publish_num - (imsizeX/2 + self.midPointOffset))/75
+
+            return publish_num
 
     def listener_callback_blue(self, msg):
-        image = self.cvb.imgmsg_to_cv2(msg)
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = cv2.flip(image, 1)
         self.blue_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_blue", self.blue_frame)
         cv2.waitKey(1)    
 
     def listener_callback_yellow(self, msg):
-        image = self.cvb.imgmsg_to_cv2(msg)
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = cv2.flip(image, 1)
         self.yellow_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_yellow", self.yellow_frame)
         cv2.waitKey(1)
         twist = Twist()
         twist.linear.x = self.base_throttle
-        pidError = self.calculate_steering()
-        angle = self.pid(pidError)
-        twist.angular.z = angle
-        self.get_logger().info("Publishing Angle: %f", angle)
-        #self.pub_cmd_vel.publish(twist)
+        try:
+            pidError = self.calculate_steering()
+            angle = self.pid(pidError)
+            twist.angular.z = angle
+            self.get_logger().info(str(angle))
+        except Exception as e:
+            print(str(e))
+            twist.linear.x = 0.0
+        self.pub_cmd_vel.publish(twist)
 
     def listener_callback_sign(self, msg):
         self.sign_detection = msg.data
