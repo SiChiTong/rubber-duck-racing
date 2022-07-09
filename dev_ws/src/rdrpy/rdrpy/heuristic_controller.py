@@ -44,14 +44,14 @@ class HeuristicController(Node):
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
-        self.declare_parameter('track_width', 105)
+        self.declare_parameter('track_width', 100)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.465)
+        self.declare_parameter('base_throttle', 0.24)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
-        self.midPointOffset = -12
-        self.pid = PID(-3.75, -0, -1.5, setpoint=0.0)
+        self.midPointOffset = -4
+        self.pid = PID(-5, -0.01, -3, setpoint=0.0)
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -81,7 +81,7 @@ class HeuristicController(Node):
             if len(yellowCont) > 0:
                 yellowRet = True
                 cont = max(yellowCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 25):
+                if (cv2.contourArea(cont) < 50):
                     yellowRet = False
                 else:
                     M = cv2.moments(cont)
@@ -96,7 +96,7 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 25):
+                if (cv2.contourArea(cont) < 50):
                     blueRet = False
                 else:
                     M = cv2.moments(cont)
@@ -156,7 +156,7 @@ class HeuristicController(Node):
             return int(x[1])
             
         else:
-            cv2.circle(f, (int(midPoints[5]), verticalPoints[5]), 10, (0, 255, 0), -1)
+            cv2.circle(f, (int(midPoints[3]), verticalPoints[3]), 10, (0, 255, 0), -1)
             cv2.imshow("frame", f)
             cv2.waitKey(1)
             publish_num = 0.0
@@ -165,7 +165,7 @@ class HeuristicController(Node):
             publish_num = publish_num/self.midpoint_segments
             publish_num = (publish_num - (imsizeX/2 + self.midPointOffset))/75
 
-            return publish_num
+            return (midPoints[3] - (imsizeX/2 + self.midPointOffset))/75
 
     def listener_callback_blue(self, msg):
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
