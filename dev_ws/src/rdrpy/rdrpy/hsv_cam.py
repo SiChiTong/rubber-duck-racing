@@ -44,7 +44,8 @@ class HSVCam(Node):
 
         timer_period = 1 / 60
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.frame_count = 0
+        yolo_period = 1 / 3
+        self.yolo_timer = self.create_timer(yolo_period, self.yolo_timer_callback)
         self.yutils = YUtils()
         self.get_logger().info("YUtils initialized")
         self.cap = camStream()
@@ -157,20 +158,19 @@ class HSVCam(Node):
             image = self.frame
 
             if (ret):
-                self.frame_count += 1
-                if (self.frame_count % 10 == 0):
-                    self.sign_detect_value = self.yutils.detect(image, False, 0.6)
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
-                self.get_logger().info("Publishing frame. Frame size: " + str(blue_mask.shape))
-                self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
-                self.pub_sign_detection.publish(int(self.sign_detect_value))
         except Exception as e:
-            self.get_logger().error(str(e)) 
+            self.get_logger().error(str(e))
+
+    def yolo_timer_callback(self):
+        self.sign_detect_value = self.yutils.detect(self.frame, False, 0.7)
+        self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
+        self.pub_sign_detect.publish(self.sign_detect_value)
 
     def calibrate_warp_callback(self, request, response):
         self.get_logger().info('Request to calibrate recieved')
@@ -181,6 +181,7 @@ class HSVCam(Node):
             self.get_logger().info(str(e))
         else:
             self.get_logger().info('Calibration Succeeded')
+            self.get_logger().info("Frame size: " + str(self.bwidth) + "x" + str(self.bheight) + "y")
         return response
 
     def refresh_params_callback(self, request, response):
