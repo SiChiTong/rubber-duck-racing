@@ -41,8 +41,9 @@ class HSVCam(Node):
         except Exception as e:
             self.get_logger().info("failed to read warp calibration file, no warp will be applied")
 
-        timer_period = 1 / 30
+        timer_period = 1 / 60
         self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.frame_count = 0
         self.yutils = YUtils()
         self.get_logger().info("YUtils initialized")
         self.cap = camStream()
@@ -155,7 +156,9 @@ class HSVCam(Node):
             image = self.frame
 
             if (ret):
-                sign_detect_value = self.yutils.detect(image)
+                self.frame_count += 1
+                if (self.frame_count % 10 == 0):
+                    sign_detect_value = self.yutils.detect(image, False, 0.6)
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
