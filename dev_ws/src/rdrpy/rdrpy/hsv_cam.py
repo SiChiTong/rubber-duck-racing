@@ -168,9 +168,11 @@ class HSVCam(Node):
             self.get_logger().error(str(e))
 
     def yolo_timer_callback(self):
+        msg = std_msgs.msg.Int8()
         self.sign_detect_value = self.yutils.detect(self.frame, False, 0.7)
+        msg.data = self.sign_detect_value
         self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
-        self.pub_sign_detection.publish(self.sign_detect_value)
+        self.pub_sign_detection.publish(msg)
 
     def calibrate_warp_callback(self, request, response):
         self.get_logger().info('Request to calibrate recieved')
