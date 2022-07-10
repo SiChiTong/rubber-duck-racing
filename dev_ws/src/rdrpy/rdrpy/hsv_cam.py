@@ -21,6 +21,7 @@ class HSVCam(Node):
         self.pub_blue_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'blue_feed', 1)
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 1)
         self.pub_sign_detection = self.create_publisher(std_msgs.msg.Int8, 'sign_detection', 10)
+        self.sign_detect_value = 0
         self.yellow_hsv_vals = [0, 30, 30, 70, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
         self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
@@ -158,16 +159,16 @@ class HSVCam(Node):
             if (ret):
                 self.frame_count += 1
                 if (self.frame_count % 10 == 0):
-                    sign_detect_value = self.yutils.detect(image, False, 0.6)
+                    self.sign_detect_value = self.yutils.detect(image, False, 0.6)
                 if (hasattr(self, 'homography')):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
                 self.get_logger().info("Publishing frame. Frame size: " + str(blue_mask.shape))
-                self.get_logger().info("Sign detect value: " + str(sign_detect_value))
+                self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
-                self.pub_sign_detection.publish(int(sign_detect_value))
+                self.pub_sign_detection.publish(int(self.sign_detect_value))
         except Exception as e:
             self.get_logger().error(str(e)) 
 
