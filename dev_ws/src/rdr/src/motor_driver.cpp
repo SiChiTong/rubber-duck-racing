@@ -24,7 +24,7 @@ class MotorDriver : public rclcpp::Node
 
   private:
   int servoMin = 300;
-  int servoMax = 520;
+  int servoMax = 460;
   int escMin = 300;
   int escMax = 520;
   
