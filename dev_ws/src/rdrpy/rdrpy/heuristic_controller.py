@@ -1,5 +1,5 @@
 import math
-from cv2 import sqrt
+from cv2 import REDUCE_MAX, sqrt
 import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
@@ -130,12 +130,19 @@ class HeuristicController(Node):
                 cv2.circle(f, (midX, circleY), 3, centerDot, -1)
 
             if (self.sign_detection == 1):
-                midX = midX - self.hug_distance
-            elif (self.sign_detection == 2):
-                midX = midX + self.hug_distance
                 midX -= self.hug_distance
             elif (self.sign_detection == 2):
                 midX += self.hug_distance
+
+
+            redX = 0
+            purpleX = 0
+        
+            if(redX != 0):
+                midX += self.avoid(yellowX, redX, blueX)
+            if(purpleX != 0):
+                midX += self.avoid(yellowX, purpleX, blueX)
+
 
             midPoints[i] = midX 
 
@@ -166,6 +173,14 @@ class HeuristicController(Node):
             publish_num = (publish_num - (imsizeX/2 + self.midPointOffset))/75
 
             return (midPoints[3] - (imsizeX/2 + self.midPointOffset))/75
+
+    def avoid(self, yellow, obstacle, blue):
+        ydist = yellow - obstacle
+        bdist = obstacle - blue
+        if(ydist >= bdist):
+            return -ydist/2
+        else:
+            return bdist/2
 
     def listener_callback_blue(self, msg):
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
