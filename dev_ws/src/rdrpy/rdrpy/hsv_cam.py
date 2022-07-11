@@ -27,8 +27,8 @@ class HSVCam(Node):
         self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)        
 
-        self.declare_parameter('warp_calib_file', 'warp_calib.npz')
-        self.declare_parameter('warp_calib_save', 'warp_calib')
+        self.declare_parameter('warp_calib_file', '/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/warp_calib.npz')
+        self.declare_parameter('warp_calib_save', '/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/warp_calib')
 
         self.yellow_hsv_vals = self.get_parameter('yellow_hsv_vals').get_parameter_value().integer_array_value
         self.blue_hsv_vals = self.get_parameter('blue_hsv_vals').get_parameter_value().integer_array_value
