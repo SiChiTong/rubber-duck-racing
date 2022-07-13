@@ -219,7 +219,7 @@ class HSVCam(Node):
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
             else:
-                self.get_logger().warn(self.ret)
+                self.get_logger().warn(str(self.ret))
                 
 
         except Exception as e:
