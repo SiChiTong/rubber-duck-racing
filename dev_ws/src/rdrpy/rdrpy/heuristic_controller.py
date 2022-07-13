@@ -28,8 +28,25 @@ class HeuristicController(Node):
             'yellow_feed',
             self.listener_callback_yellow,
             10)
+        self.subscription_purple = self.create_subscription(
+            sensor_msgs.msg.CompressedImage,
+            'purple_feed',
+            self.listener_callback_purple,
+            10)
+        self.subscription_red = self.create_subscription(
+            sensor_msgs.msg.CompressedImage,
+            'red_feed',
+            self.listener_callback_red,
+            10)
+        self.subscription_green = self.create_subscription(
+            sensor_msgs.msg.CompressedImage,
+            'green_feed',
+            self.listener_callback_green,
+            10)
         self.yellow_frame = np.zeros((640, 480))
         self.blue_frame = np.zeros((640, 480))
+        self.purple_frame = np.zeros((640, 480))
+        self.red_frame = np.zeros((640, 480))
 
         self.subscription_sign = self.create_subscription(
             Int8,
@@ -135,8 +152,8 @@ class HeuristicController(Node):
                 midX += self.hug_distance
 
 
-            redX = 0
-            purpleX = 0
+            redX = self.red_frame
+            purpleX = self.purple_frame
         
             if(redX != 0):
                 midX += self.avoid(yellowX, redX, blueX)
@@ -206,6 +223,21 @@ class HeuristicController(Node):
             print(str(e))
             twist.linear.x = 0.0
         self.pub_cmd_vel.publish(twist)
+
+    def listener_callback_purple(self, msg):
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = cv2.flip(image, 1)
+        self.purple_frame = image[image.shape[0]//2:image.shape[0]]
+
+    def listener_callback_red(self, msg):
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = cv2.flip(image, 1)
+        self.red_frame = image[image.shape[0]//2:image.shape[0]]
+
+    def listener_callback_green(self, msg):
+        image = self.cvb.compressed_imgmsg_to_cv2(msg)
+        image = cv2.flip(image, 1)
+        self.green_frame = image[image.shape[0]//2:image.shape[0]]
 
     def listener_callback_sign(self, msg):
         self.sign_detection = msg.data
