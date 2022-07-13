@@ -57,7 +57,7 @@ class HeuristicController(Node):
 
         self.declare_parameter('midpoint_segments', 12)
         self.midpoint_segments = self.get_parameter('midpoint_segments').get_parameter_value().integer_value
-        self.declare_parameter('blue_is_left', False)
+        self.declare_parameter('blue_is_left', True)
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
@@ -68,7 +68,7 @@ class HeuristicController(Node):
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-6.75, -0.01, -2, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.5, -0.03, -1.75, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -98,7 +98,7 @@ class HeuristicController(Node):
             if len(yellowCont) > 0:
                 yellowRet = True
                 cont = max(yellowCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 50):
+                if (cv2.contourArea(cont) < 25):
                     yellowRet = False
                 else:
                     M = cv2.moments(cont)
@@ -113,7 +113,7 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 50):
+                if (cv2.contourArea(cont) < 25):
                     blueRet = False
                 else:
                     M = cv2.moments(cont)
@@ -152,13 +152,13 @@ class HeuristicController(Node):
                 midX += self.hug_distance
 
 
-            redX = self.red_frame
-            purpleX = self.purple_frame
-        
-            if(redX != 0):
-                midX += self.avoid(yellowX, redX, blueX)
-            if(purpleX != 0):
-                midX += self.avoid(yellowX, purpleX, blueX)
+            #redX = self.red_frame
+            #purpleX = self.purple_frame
+        #
+         #   if(redX != 0):
+         #       midX += self.avoid(yellowX, redX, blueX)
+         #   if(purpleX != 0):
+         #       midX += self.avoid(yellowX, purpleX, blueX)
 
 
             midPoints[i] = midX 
@@ -222,19 +222,22 @@ class HeuristicController(Node):
         except Exception as e:
             print(str(e))
             twist.linear.x = 0.0
-        self.pub_cmd_vel.publish(twist)
+        #self.pub_cmd_vel.publish(twist)
 
     def listener_callback_purple(self, msg):
+        return
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
         image = cv2.flip(image, 1)
         self.purple_frame = image[image.shape[0]//2:image.shape[0]]
 
     def listener_callback_red(self, msg):
+        return
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
         image = cv2.flip(image, 1)
         self.red_frame = image[image.shape[0]//2:image.shape[0]]
 
     def listener_callback_green(self, msg):
+        return
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
         image = cv2.flip(image, 1)
         self.green_frame = image[image.shape[0]//2:image.shape[0]]
