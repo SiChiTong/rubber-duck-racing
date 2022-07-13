@@ -62,7 +62,7 @@ class HSVCam(Node):
         self.get_logger().info("YUtils initialized")
         self.cap = camStream()
         self.get_logger().info("camera stream initialised")
-        ret, self.frame = self.cap.read()
+        self.ret, self.frame = self.cap.read()
         self.cvb = CvBridge()
         self.get_logger().info("CvBridge initialised")     
 
