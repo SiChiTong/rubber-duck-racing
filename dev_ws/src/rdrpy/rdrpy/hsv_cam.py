@@ -215,7 +215,7 @@ class HSVCam(Node):
                     image = cv2.warpPerspective(image, self.homography, (self.bwidth, self.bheight), cv2.INTER_NEAREST)
 
                 blue_mask, yellow_mask = self.hsv_line_detect(image)
-                
+                self.get_logger.info("Publishing frame")
                 self.pub_blue_img.publish(self.cvb.cv2_to_compressed_imgmsg(blue_mask))
                 self.pub_yellow_img.publish(self.cvb.cv2_to_compressed_imgmsg(yellow_mask))
                 
