@@ -15,7 +15,6 @@ class CameraProcessor(Node):
         timer_period = 1 / 30
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.get_logger().info("YUtils initialized")
         self.cap = camStream()
         self.get_logger().info("camera stream initialised")
         ret, self.frame = self.cap.read()
