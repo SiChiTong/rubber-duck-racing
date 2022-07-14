@@ -25,15 +25,15 @@ class HSVCam(Node):
         self.pub_green_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'green_feed', 1)
         self.pub_sign_detection = self.create_publisher(std_msgs.msg.Int8, 'sign_detection', 10)
         self.sign_detect_value = 0
-        self.yellow_hsv_vals = [0, 30, 30, 70, 255, 255]
+        self.yellow_hsv_vals = [0, 60, 150, 25, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
-        self.blue_hsv_vals = [80, 60, 60, 150, 255, 255]
+        self.blue_hsv_vals = [105, 67, 115, 140, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)     
         self.purple_hsv_vals = [80, 60, 60, 150, 255, 255]
         self.declare_parameter('purple_hsv_vals', self.purple_hsv_vals)  
         self.red_hsv_vals = [0, 100, 20, 10, 255, 255]
         self.declare_parameter('red_hsv_vals', self.red_hsv_vals)  
-        self.green_hsv_vals = [0, 100, 20, 10, 255, 255]
+        self.green_hsv_vals = [25, 70, 115, 95, 255, 255]
         self.declare_parameter('green_hsv_vals', self.green_hsv_vals) 
 
         self.declare_parameter('warp_calib_file', '/rubber-duck-racing/dev_ws/src/rdrpy/rdrpy/warp_calib.npz')
