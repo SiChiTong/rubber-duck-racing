@@ -211,9 +211,10 @@ class HeuristicController(Node):
         image = cv2.flip(image, 1)
         self.yellow_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_yellow", self.yellow_frame)
-        cv2.waitKey(1)
         twist = Twist()
         twist.linear.x = self.base_throttle
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            twist.linear.x = -0.1
         try:
             pidError = self.calculate_steering()
             angle = self.pid(pidError)
