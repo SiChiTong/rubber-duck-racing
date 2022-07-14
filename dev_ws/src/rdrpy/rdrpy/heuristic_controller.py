@@ -239,7 +239,9 @@ class HeuristicController(Node):
         self.red_frame = image[image.shape[0]//2:image.shape[0]]
 
     def listener_callback_green(self, msg):
-        print(msg)
+        print(msg.data)
+        if (msg.data == True):
+            self.base_throttle = 0.0
         return
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
         image = cv2.flip(image, 1)
