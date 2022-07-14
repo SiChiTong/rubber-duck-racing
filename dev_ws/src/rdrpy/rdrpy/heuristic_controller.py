@@ -68,7 +68,7 @@ class HeuristicController(Node):
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-5.5, -0.015, -1.5, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.5, -0.03, -1.75, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -212,9 +212,9 @@ class HeuristicController(Node):
         self.yellow_frame = image[image.shape[0]//2:image.shape[0]]
         cv2.imshow("recieve_yellow", self.yellow_frame)
         twist = Twist()
-        twist.linear.x = self.base_throttle
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            twist.linear.x = -0.1
+            self.base_throttle = -0.1
+        twist.linear.x = self.base_throttle
         try:
             pidError = self.calculate_steering()
             angle = self.pid(pidError)
