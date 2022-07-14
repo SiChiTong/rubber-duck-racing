@@ -68,7 +68,7 @@ class HeuristicController(Node):
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-5.5, -0.03, -1.75, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.75, -0.015, -2, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
