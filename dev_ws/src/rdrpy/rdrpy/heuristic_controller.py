@@ -63,12 +63,12 @@ class HeuristicController(Node):
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
         self.declare_parameter('track_width', 100)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.22)
+        self.declare_parameter('base_throttle', 0.27)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-5.5, -0.03, -2, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.5, -0.03, -1.5, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -98,7 +98,7 @@ class HeuristicController(Node):
             if len(yellowCont) > 0:
                 yellowRet = True
                 cont = max(yellowCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 15):
+                if (cv2.contourArea(cont) < 20):
                     yellowRet = False
                 else:
                     M = cv2.moments(cont)
@@ -113,7 +113,7 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 15):
+                if (cv2.contourArea(cont) < 20):
                     blueRet = False
                 else:
                     M = cv2.moments(cont)
@@ -213,7 +213,7 @@ class HeuristicController(Node):
         cv2.imshow("recieve_yellow", self.yellow_frame)
         cv2.waitKey(1)
         twist = Twist()
-        twist.linear.x = 0.0 #self.base_throttle
+        twist.linear.x = self.base_throttle
         try:
             pidError = self.calculate_steering()
             angle = self.pid(pidError)

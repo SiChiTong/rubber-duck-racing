@@ -137,6 +137,7 @@ class HSVCam(Node):
                 return pth, bwidth, bheight
 
     def hsv_line_detect(self, image):
+        image = cv2.equalizeHist(image)
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         blue_mask = cv2.inRange(hsv_image, 
             (
