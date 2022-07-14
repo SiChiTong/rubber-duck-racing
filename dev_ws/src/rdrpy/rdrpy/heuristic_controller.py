@@ -63,12 +63,12 @@ class HeuristicController(Node):
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
         self.declare_parameter('track_width', 100)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.23)
+        self.declare_parameter('base_throttle', 0.255)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-5.5, -0.03, -1.5, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.5, -0.015, -1.5, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -180,7 +180,7 @@ class HeuristicController(Node):
             return int(x[1])
             
         else:
-            cv2.circle(f, (int(midPoints[3]), verticalPoints[3]), 10, (0, 255, 0), -1)
+            cv2.circle(f, (int(midPoints[5]), verticalPoints[5]), 10, (0, 255, 0), -1)
             cv2.imshow("frame", f)
             cv2.waitKey(1)
             publish_num = 0.0
@@ -189,7 +189,7 @@ class HeuristicController(Node):
             publish_num = publish_num/self.midpoint_segments
             publish_num = (publish_num - (imsizeX/2 + self.midPointOffset))/75
 
-            return (midPoints[3] - (imsizeX/2 + self.midPointOffset))/75
+            return (midPoints[5] - (imsizeX/2 + self.midPointOffset))/75
 
     def avoid(self, yellow, obstacle, blue):
         ydist = yellow - obstacle
