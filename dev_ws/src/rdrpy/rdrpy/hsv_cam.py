@@ -22,7 +22,7 @@ class HSVCam(Node):
         self.pub_yellow_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'yellow_feed', 1)
         self.pub_purple_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'purple_feed', 1)
         self.pub_red_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'red_feed', 1)
-        self.pub_green_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'green_feed', 1)
+        self.pub_green_img = self.create_publisher(sensor_msgs.msg.Bool, 'green', 1)
         self.pub_sign_detection = self.create_publisher(std_msgs.msg.Int8, 'sign_detection', 10)
         self.sign_detect_value = 0
         self.yellow_hsv_vals = [8, 50, 130, 50, 255, 255]
@@ -230,12 +230,21 @@ class HSVCam(Node):
             msg = std_msgs.msg.Int8()
             self.sign_detect_value = self.yutils.detect(self.frame, False, 0.7)
             msg.data = self.sign_detect_value
-            # purple_mask, red_mask, green_mask = self.hsv_aux_detect(self.frame)
+            purple_mask, red_mask, green_mask = self.hsv_aux_detect(self.frame)
+            params = cv2.SimpleBlobDetector_Params()
+            params.filterByArea = True
+            params.minArea = 1500
+            detector = cv2.SimpleBlobDetector_create(params)
+
+            keypoints = detector.detect(green_mask)
+            
+            self.pub_green_img.publish(keypoints.len() != 0)
             self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
             self.pub_sign_detection.publish(msg)
             # self.pub_purple_img.publish(self.cvb.cv2_to_compressed_imgmsg(purple_mask))
             # self.pub_red_img.publish(self.cvb.cv2_to_compressed_imgmsg(red_mask))
             # self.pub_green_img.publish(self.cvb.cv2_to_compressed_imgmsg(green_mask))
+            
 
     def calibrate_warp_callback(self, request, response):
         self.get_logger().info('Request to calibrate recieved')
