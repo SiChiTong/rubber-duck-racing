@@ -63,7 +63,7 @@ class HeuristicController(Node):
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
         self.declare_parameter('track_width', 100)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.27)
+        self.declare_parameter('base_throttle', 0.23)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
