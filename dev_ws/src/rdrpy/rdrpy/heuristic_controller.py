@@ -6,6 +6,7 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist 
 import sensor_msgs.msg
 from std_msgs.msg import Int8
+from std_msgs.msg import Bool
 
 import cv2
 import numpy as np
@@ -39,7 +40,7 @@ class HeuristicController(Node):
             self.listener_callback_red,
             10)
         self.subscription_green = self.create_subscription(
-            sensor_msgs.msg.CompressedImage,
+            Bool,
             'green_feed',
             self.listener_callback_green,
             10)
@@ -238,6 +239,7 @@ class HeuristicController(Node):
         self.red_frame = image[image.shape[0]//2:image.shape[0]]
 
     def listener_callback_green(self, msg):
+        print(msg)
         return
         image = self.cvb.compressed_imgmsg_to_cv2(msg)
         image = cv2.flip(image, 1)
