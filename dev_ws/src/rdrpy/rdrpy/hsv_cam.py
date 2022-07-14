@@ -233,7 +233,7 @@ class HSVCam(Node):
             purple_mask, red_mask, green_mask = self.hsv_aux_detect(self.frame)
             params = cv2.SimpleBlobDetector_Params()
             params.filterByArea = True
-            params.minArea = 15
+            params.minArea = 5
             detector = cv2.SimpleBlobDetector_create(params)
 
             keypoints = detector.detect(green_mask)
