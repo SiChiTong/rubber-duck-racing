@@ -238,7 +238,11 @@ class HSVCam(Node):
 
             keypoints = detector.detect(green_mask)
             
-            self.pub_green_img.publish(keypoints.len() != 0)
+            bool = std_msgs.msg.Bool()
+
+            bool.data = len(keypoints) != 0
+
+            self.pub_green_img.publish(bool)
             self.get_logger().info("Sign detect value: " + str(self.sign_detect_value))
             self.pub_sign_detection.publish(msg)
             # self.pub_purple_img.publish(self.cvb.cv2_to_compressed_imgmsg(purple_mask))
