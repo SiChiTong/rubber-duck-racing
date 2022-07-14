@@ -25,9 +25,9 @@ class HSVCam(Node):
         self.pub_green_img = self.create_publisher(sensor_msgs.msg.CompressedImage, 'green_feed', 1)
         self.pub_sign_detection = self.create_publisher(std_msgs.msg.Int8, 'sign_detection', 10)
         self.sign_detect_value = 0
-        self.yellow_hsv_vals = [0, 60, 150, 25, 255, 255]
+        self.yellow_hsv_vals = [8, 50, 130, 50, 255, 255]
         self.declare_parameter('yellow_hsv_vals', self.yellow_hsv_vals)
-        self.blue_hsv_vals = [105, 67, 115, 140, 255, 255]
+        self.blue_hsv_vals = [105, 80, 130, 140, 255, 255]
         self.declare_parameter('blue_hsv_vals', self.blue_hsv_vals)     
         self.purple_hsv_vals = [80, 60, 60, 150, 255, 255]
         self.declare_parameter('purple_hsv_vals', self.purple_hsv_vals)  

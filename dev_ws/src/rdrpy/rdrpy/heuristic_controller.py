@@ -57,18 +57,18 @@ class HeuristicController(Node):
 
         self.declare_parameter('midpoint_segments', 12)
         self.midpoint_segments = self.get_parameter('midpoint_segments').get_parameter_value().integer_value
-        self.declare_parameter('blue_is_left', True)
+        self.declare_parameter('blue_is_left', False)
         self.blue_is_left = self.get_parameter('blue_is_left').get_parameter_value().bool_value
         self.declare_parameter('use_polyfit', False)
         self.use_polyfit = self.get_parameter('use_polyfit').get_parameter_value().bool_value
         self.declare_parameter('track_width', 100)
         self.track_width = self.get_parameter('track_width').get_parameter_value().integer_value
-        self.declare_parameter('base_throttle', 0.24)
+        self.declare_parameter('base_throttle', 0.22)
         self.base_throttle = self.get_parameter('base_throttle').get_parameter_value().double_value
         self.declare_parameter('hug_distance', 50)
         self.hug_distance = self.get_parameter('hug_distance').get_parameter_value().integer_value
         self.midPointOffset = -4
-        self.pid = PID(-5.5, -0.03, -1.75, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
+        self.pid = PID(-5.5, -0.03, -2, setpoint=0.0, output_limits=(-1.0, 1.0), sample_time=(1/60))
         self.pid.proportional_on_measurement = True
 
     def calculate_steering(self):
@@ -98,7 +98,7 @@ class HeuristicController(Node):
             if len(yellowCont) > 0:
                 yellowRet = True
                 cont = max(yellowCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 25):
+                if (cv2.contourArea(cont) < 15):
                     yellowRet = False
                 else:
                     M = cv2.moments(cont)
@@ -113,7 +113,7 @@ class HeuristicController(Node):
             if len(blueCont) > 0:
                 blueRet = True
                 cont = max(blueCont, key = cv2.contourArea)
-                if (cv2.contourArea(cont) < 25):
+                if (cv2.contourArea(cont) < 15):
                     blueRet = False
                 else:
                     M = cv2.moments(cont)
@@ -213,7 +213,7 @@ class HeuristicController(Node):
         cv2.imshow("recieve_yellow", self.yellow_frame)
         cv2.waitKey(1)
         twist = Twist()
-        twist.linear.x = self.base_throttle
+        twist.linear.x = 0.0 #self.base_throttle
         try:
             pidError = self.calculate_steering()
             angle = self.pid(pidError)
@@ -222,7 +222,7 @@ class HeuristicController(Node):
         except Exception as e:
             print(str(e))
             twist.linear.x = 0.0
-        #self.pub_cmd_vel.publish(twist)
+        self.pub_cmd_vel.publish(twist)
 
     def listener_callback_purple(self, msg):
         return
