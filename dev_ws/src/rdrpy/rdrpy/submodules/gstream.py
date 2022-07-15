@@ -1,7 +1,7 @@
 import cv2
 
 def gstreamer_pipeline(
-    sensor_id=1,
+    sensor_id=0,
     capture_width=1280,
     capture_height=720,
     display_width=640,
